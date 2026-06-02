@@ -1,0 +1,207 @@
+/* ============================================================
+   WISY DESIGN SYSTEM — Foundations
+   Source of truth: Brand Style Tile (assets/Brand_Style_Tile.png)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ----------  COLOR — RAW TOKENS  ---------- */
+
+  /* Brand accents */
+  --wisy-indigo:      #5354ED;   /* Primary accent — logo, CTAs, links */
+  --wisy-lime:        #DDF45B;   /* Secondary accent — highlights, callouts */
+
+  /* Neutrals */
+  --wisy-black:       #000000;
+  --wisy-gray-500:    #AAAAAA;   /* Mid gray — placeholders, captions */
+  --wisy-gray-50:     #F5F5F5;   /* Surface tint — large soft cards */
+  --wisy-white:       #FFFFFF;
+
+  /* Indigo tints (the soft lavender family from the tile) */
+  --wisy-indigo-200:  #CDD1FF;   /* Strong tint — secondary surfaces */
+  --wisy-indigo-100:  #F0F1FF;   /* Wash — section backgrounds, tags */
+
+  /* Derived shades for hover / press / focus (kept inside the indigo hue) */
+  --wisy-indigo-700:  #3F3FD5;   /* Hover on primary */
+  --wisy-indigo-800:  #2B2BB8;   /* Press on primary */
+  --wisy-indigo-300:  #A8AFFF;   /* Soft border / focus ring */
+  --wisy-lime-700:    #C5DC3D;   /* Hover on lime */
+
+  /* Semantic helpers (kept neutral; brand favors restraint) */
+  --wisy-success:     #1F8A5B;
+  --wisy-warning:     #E08A00;
+  --wisy-danger:      #D24A3C;
+
+  /* ----------  COLOR — SEMANTIC ROLES  ---------- */
+
+  /* Foreground */
+  --fg:               var(--wisy-black);
+  --fg-1:             var(--wisy-black);           /* Primary text */
+  --fg-2:             #4A4A4A;                     /* Body secondary */
+  --fg-3:             var(--wisy-gray-500);        /* Captions, placeholders */
+  --fg-on-indigo:     var(--wisy-white);
+  --fg-on-lime:       var(--wisy-black);
+  --fg-accent:        var(--wisy-indigo);
+
+  /* Background */
+  --bg:               var(--wisy-white);
+  --bg-1:             var(--wisy-white);           /* Page background */
+  --bg-2:             var(--wisy-gray-50);         /* Soft surface — large cards */
+  --bg-3:             var(--wisy-indigo-100);      /* Tint surface — callouts */
+  --bg-inverse:       var(--wisy-black);
+  --bg-accent:        var(--wisy-indigo);
+  --bg-accent-soft:   var(--wisy-indigo-100);
+
+  /* Border */
+  --border-1:         #E6E6E6;                     /* Default border */
+  --border-2:         var(--wisy-indigo-200);      /* Accent border */
+  --border-strong:    var(--wisy-black);
+
+  /* ----------  TYPOGRAPHY — FAMILIES  ---------- */
+  --font-sans:   "Figtree", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:   "Roboto Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* ----------  TYPOGRAPHY — SCALE  ---------- */
+  /* Display sizes follow the tile: large weight 500/600, very tight leading. */
+  --fs-display-xl: 96px;   --lh-display-xl: 0.95;
+  --fs-display-l:  72px;   --lh-display-l:  1.00;
+  --fs-display-m:  56px;   --lh-display-m:  1.02;
+  --fs-display-s:  44px;   --lh-display-s:  1.05;
+
+  --fs-h1:         36px;   --lh-h1:         1.10;
+  --fs-h2:         28px;   --lh-h2:         1.15;
+  --fs-h3:         22px;   --lh-h3:         1.20;
+  --fs-h4:         18px;   --lh-h4:         1.30;
+
+  --fs-body-l:     18px;   --lh-body-l:     1.50;
+  --fs-body:       16px;   --lh-body:       1.50;
+  --fs-body-s:     14px;   --lh-body-s:     1.45;
+
+  --fs-caption:    13px;   --lh-caption:    1.35;
+  --fs-tag:        12px;   --lh-tag:        1.20;    /* mono, all-caps */
+  --fs-micro:      11px;   --lh-micro:      1.20;
+
+  /* Weights */
+  --fw-regular:    400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+
+  /* Tracking */
+  --ls-tight:      -0.02em;     /* display */
+  --ls-snug:       -0.01em;     /* headings */
+  --ls-normal:     0;
+  --ls-wide:       0.06em;      /* mono caps */
+  --ls-wider:      0.12em;      /* mono caps small */
+
+  /* ----------  SPACING  ---------- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ----------  RADII  ---------- */
+  /* Wisy uses GENEROUSLY rounded corners on large cards and pill capsules. */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-2xl: 40px;
+  --radius-pill: 999px;
+
+  /* ----------  SHADOWS  ---------- */
+  /* Subtle and crisp — Wisy is "clean", not "fluffy". No big glows. */
+  --shadow-xs: 0 1px 0 rgba(16, 24, 64, 0.04);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 64, 0.06), 0 1px 1px rgba(16, 24, 64, 0.03);
+  --shadow-md: 0 6px 14px rgba(16, 24, 64, 0.07), 0 2px 4px rgba(16, 24, 64, 0.04);
+  --shadow-lg: 0 18px 40px rgba(16, 24, 64, 0.10), 0 4px 8px rgba(16, 24, 64, 0.05);
+  --shadow-indigo: 0 12px 28px rgba(83, 84, 237, 0.18);
+
+  /* ----------  MOTION  ---------- */
+  --ease-out:   cubic-bezier(0.16, 1, 0.30, 1);   /* default snappy */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   360ms;
+}
+
+/* ============================================================
+   SEMANTIC TYPOGRAPHY CLASSES
+   Use these on real elements. Keep raw vars for one-offs.
+   ============================================================ */
+
+.t-display-xl,
+.t-display-l,
+.t-display-m,
+.t-display-s {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-tight);
+  color: var(--fg-1);
+  text-wrap: balance;
+}
+.t-display-xl { font-size: var(--fs-display-xl); line-height: var(--lh-display-xl); }
+.t-display-l  { font-size: var(--fs-display-l);  line-height: var(--lh-display-l);  }
+.t-display-m  { font-size: var(--fs-display-m);  line-height: var(--lh-display-m);  }
+.t-display-s  { font-size: var(--fs-display-s);  line-height: var(--lh-display-s);  }
+
+.t-h1, .t-h2, .t-h3, .t-h4 {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-snug);
+  color: var(--fg-1);
+}
+.t-h1 { font-size: var(--fs-h1); line-height: var(--lh-h1); }
+.t-h2 { font-size: var(--fs-h2); line-height: var(--lh-h2); }
+.t-h3 { font-size: var(--fs-h3); line-height: var(--lh-h3); }
+.t-h4 { font-size: var(--fs-h4); line-height: var(--lh-h4); }
+
+.t-body-l { font-family: var(--font-sans); font-weight: var(--fw-regular); font-size: var(--fs-body-l); line-height: var(--lh-body-l); color: var(--fg-1); }
+.t-body   { font-family: var(--font-sans); font-weight: var(--fw-regular); font-size: var(--fs-body);   line-height: var(--lh-body);   color: var(--fg-1); }
+.t-body-s { font-family: var(--font-sans); font-weight: var(--fw-regular); font-size: var(--fs-body-s); line-height: var(--lh-body-s); color: var(--fg-2); }
+.t-caption{ font-family: var(--font-sans); font-weight: var(--fw-regular); font-size: var(--fs-caption);line-height: var(--lh-caption);color: var(--fg-3); }
+
+/* Mono — always uppercase, always letter-spaced. Used for tags, labels, kickers. */
+.t-tag, .t-kicker, .t-mono-caps {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-tag);
+  line-height: var(--lh-tag);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+.t-mono { font-family: var(--font-mono); font-weight: var(--fw-regular); }
+
+/* Inline link style (indigo, underline on hover) */
+.t-link {
+  color: var(--fg-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.t-link:hover { border-bottom-color: var(--fg-accent); }
+
+/* ============================================================
+   BASE ELEMENT BINDINGS
+   Apply via class on a wrapper to opt in (e.g. <body class="wisy">)
+   ============================================================ */
+
+.wisy { font-family: var(--font-sans); color: var(--fg-1); background: var(--bg-1); }
+.wisy h1 { font-size: var(--fs-h1); line-height: var(--lh-h1); font-weight: var(--fw-semibold); letter-spacing: var(--ls-snug); }
+.wisy h2 { font-size: var(--fs-h2); line-height: var(--lh-h2); font-weight: var(--fw-semibold); letter-spacing: var(--ls-snug); }
+.wisy h3 { font-size: var(--fs-h3); line-height: var(--lh-h3); font-weight: var(--fw-semibold); }
+.wisy h4 { font-size: var(--fs-h4); line-height: var(--lh-h4); font-weight: var(--fw-semibold); }
+.wisy p  { font-size: var(--fs-body); line-height: var(--lh-body); }
+.wisy code, .wisy kbd, .wisy pre { font-family: var(--font-mono); }
