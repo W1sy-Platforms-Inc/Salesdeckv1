@@ -1,0 +1,4230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Wisy — From shelf to HQ</title>
+<link rel="stylesheet" href="colors_and_type.css" />
+<style>
+  /* -------- Deck scale (1920×1080) -------- */
+  :root {
+    --type-title:     112px;
+    --type-display:   96px;
+    --type-subtitle:  44px;
+    --type-h:         60px;
+    --type-body:      30px;
+    --type-body-l:    36px;
+    --type-small:     24px;
+    --type-mono:      20px;
+
+    --pad-top:    96px;
+    --pad-bottom: 96px;
+    --pad-x:      120px;
+    --gap-title:  56px;
+    --gap-item:   28px;
+  }
+
+  html, body { margin: 0; padding: 0; background: #000; font-family: var(--font-sans); color: var(--fg-1); }
+
+  deck-stage { background: var(--wisy-white); }
+
+  /* -------- Slide base -------- */
+  section {
+    box-sizing: border-box;
+    background: var(--wisy-white);
+    color: var(--fg-1);
+    overflow: hidden;
+    font-family: var(--font-sans);
+  }
+
+  /* Standard padded slide */
+  .slide-pad {
+    padding: var(--pad-top) var(--pad-x) var(--pad-bottom);
+  }
+
+  /* -------- Reusable text -------- */
+  .kicker {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .kicker .dot {
+    width: 10px; height: 10px; border-radius: 999px;
+    background: var(--wisy-indigo);
+    display: inline-block;
+  }
+  .kicker.on-dark { color: var(--wisy-indigo-200); }
+  .kicker.on-dark .dot { background: var(--wisy-lime); }
+
+  .title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: var(--type-title);
+    line-height: 0.97;
+    letter-spacing: -0.025em;
+    color: var(--fg-1);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .title .ink-indigo { color: var(--wisy-indigo); }
+  .title .ink-lime {
+    background: var(--wisy-lime);
+    padding: 0 14px 6px;
+    border-radius: 12px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .subtitle {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: var(--type-subtitle);
+    line-height: 1.18;
+    letter-spacing: -0.012em;
+    color: var(--fg-2);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .body {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: var(--type-body-l);
+    line-height: 1.45;
+    color: var(--fg-1);
+    margin: 0;
+  }
+  .body-s {
+    font-size: var(--type-body);
+    color: var(--fg-2);
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  /* Pills / chips */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    padding: 0 26px;
+    border-radius: 999px;
+    background: var(--wisy-indigo-100);
+    color: var(--wisy-indigo);
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pill.lime { background: var(--wisy-lime); color: var(--wisy-black); }
+  .pill.ink  { background: var(--wisy-black); color: var(--wisy-white); }
+  .pill.outline { background: transparent; color: var(--wisy-black); border: 1.5px solid var(--wisy-black); }
+
+  /* Page chrome — slide number + brand */
+  .chrome {
+    position: absolute;
+    inset: auto 0 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--pad-x);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    pointer-events: none;
+  }
+  .chrome.on-dark { color: rgba(255,255,255,0.55); }
+  .chrome .brand { display: inline-flex; align-items: center; gap: 12px; }
+  .chrome .brand .w {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    text-transform: lowercase;
+    color: var(--wisy-indigo);
+  }
+  .chrome.on-dark .brand .w { color: var(--wisy-white); }
+
+  /* ============================================================
+     SLIDE 1 — Title
+     ============================================================ */
+  .s-title {
+    position: relative;
+    height: 100%;
+    background: var(--wisy-white);
+    display: grid;
+    grid-template-columns: 1fr 720px;
+  }
+  .s-title__left {
+    padding: 96px var(--pad-x) 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    height: 100%;
+  }
+  .s-title__wordmark {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 200px;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--wisy-indigo);
+    text-transform: lowercase;
+    margin: 24px 0 0;
+  }
+  .s-title__hook {
+    max-width: 920px;
+  }
+  .s-title__hook .t {
+    font-size: 76px;
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    color: var(--wisy-black);
+    margin: 0 0 28px;
+    text-wrap: balance;
+  }
+  .s-title__hook .t em {
+    font-style: normal;
+    color: var(--wisy-indigo);
+  }
+  .s-title__hook .sub {
+    font-size: 26px;
+    color: var(--fg-2);
+    line-height: 1.4;
+    margin: 0;
+    max-width: 760px;
+  }
+  .s-title__meta {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    color: var(--fg-3);
+    font-family: var(--font-mono);
+    font-size: 24px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .s-title__meta span.bar { width: 32px; height: 1px; background: var(--fg-3); }
+
+  .s-title__right {
+    position: relative;
+    background: var(--wisy-indigo);
+    overflow: hidden;
+  }
+  .s-title__right::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 30%, rgba(221,244,91,0.18), transparent 60%),
+      url("https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=1600&q=80&auto=format&fit=crop") center/cover;
+    mix-blend-mode: luminosity;
+    opacity: 0.55;
+  }
+  .s-title__right::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(83,84,237,0.55) 0%, rgba(83,84,237,0.92) 100%);
+  }
+  .s-title__rightInner {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 72px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: var(--wisy-white);
+  }
+  .s-title__mark {
+    width: 84px; height: 84px;
+    border-radius: 20px;
+    background: var(--wisy-white);
+    display: grid; place-items: center;
+    font-family: var(--font-sans);
+    color: var(--wisy-indigo);
+    font-weight: 700;
+    font-size: 56px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .s-title__statBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .s-title__stat {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--wisy-lime);
+    margin: 0;
+  }
+  .s-title__statLbl {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.35;
+    color: rgba(255,255,255,0.9);
+    max-width: 520px;
+    margin: 0;
+  }
+
+  /* ============================================================
+     SLIDE 2 — $1.7T
+     ============================================================ */
+  .s-stakes {
+    height: 100%;
+    box-sizing: border-box;
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    position: relative;
+    padding: 72px var(--pad-x) 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .s-stakes .kicker { color: var(--wisy-indigo-200); }
+  .s-stakes .kicker .dot { background: var(--wisy-lime); }
+
+  .s-stakes__hero {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 64px;
+    align-items: center;
+    flex: 1;
+    min-height: 0;
+  }
+  .s-stakes__number {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 300px;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+    color: var(--wisy-lime);
+    margin: 0;
+  }
+  .s-stakes__number .unit { font-size: 200px; color: var(--wisy-white); letter-spacing: -0.02em; margin-left: 12px; }
+  .s-stakes__copy h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--wisy-white);
+    margin: 0 0 24px;
+    text-wrap: balance;
+  }
+  .s-stakes__copy p {
+    font-size: 26px;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.78);
+    margin: 0;
+    max-width: 580px;
+  }
+  .s-stakes__row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 36px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    align-items: start;
+    flex-shrink: 0;
+  }
+  .s-stakes__cell .n {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--wisy-white);
+    margin: 0 0 12px;
+  }
+  .s-stakes__cell .n .accent { color: var(--wisy-lime); }
+  .s-stakes__cell .l {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    line-height: 1.3;
+    color: rgba(255,255,255,0.78);
+    margin: 0;
+  }
+  .s-stakes__cell.quote {
+    padding: 4px 0 4px 22px;
+    border-left: 2px solid var(--wisy-lime);
+  }
+  .s-stakes__cell.quote .q {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.25;
+    color: var(--wisy-lime);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* ============================================================
+     SLIDE 3 — Ground reality
+     ============================================================ */
+  .s-ground {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    grid-template-rows: 100%;
+    overflow: hidden;
+  }
+  .s-ground__photo {
+    position: relative;
+    overflow: hidden;
+    --gd-ai: #16C47F;       /* detection green — AI */
+    --gd-maria: var(--wisy-indigo);  /* blue — Maria */
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.05) 34%, rgba(0,0,0,0.42) 100%),
+      url("https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=1600&q=80&auto=format&fit=crop") center/cover;
+  }
+
+  /* Rep + chips overlay */
+  .s-ground__rep {
+    position: absolute;
+    inset: auto 56px 56px;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 18px;
+    z-index: 3;
+  }
+  .s-ground__rep .nameRow { display: flex; align-items: center; gap: 16px; }
+  .s-ground__rep .avatar {
+    width: 64px; height: 64px; border-radius: 999px;
+    background: var(--wisy-indigo); color: var(--wisy-white);
+    display: grid; place-items: center;
+    font-weight: 600; font-size: 24px;
+    border: 3px solid var(--wisy-white);
+  }
+  .s-ground__rep .name {
+    font-family: var(--font-sans); color: var(--wisy-white);
+    font-weight: 600; font-size: 26px; line-height: 1.2;
+  }
+  .s-ground__rep .name span {
+    display: block; font-size: 20px; font-weight: 400;
+    color: rgba(255,255,255,0.85);
+    font-family: var(--font-mono); letter-spacing: 0.08em;
+    text-transform: uppercase; margin-top: 4px;
+  }
+  .s-ground__chips { display: flex; flex-wrap: wrap; gap: 10px; max-width: 640px; }
+  .s-ground__chips .c {
+    background: rgba(255,255,255,0.95); color: var(--wisy-black);
+    border-radius: 999px; padding: 10px 18px;
+    font-family: var(--font-mono); font-size: 18px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+  .s-ground__chips .c.warn { background: var(--wisy-lime); color: var(--wisy-black); }
+
+  /* Top context chip */
+  .s-ground__scan {
+    position: absolute;
+    top: 40px; left: 40px;
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(0,0,0,0.62);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    padding: 12px 22px 12px 18px;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--wisy-white);
+  }
+  .s-ground__scan .live {
+    width: 9px; height: 9px; border-radius: 999px;
+    background: var(--gd-ai);
+    box-shadow: 0 0 0 4px rgba(22,196,127,0.3);
+  }
+  .s-ground__scan .sep { opacity: 0.4; }
+  .s-ground__scan .muted { color: rgba(255,255,255,0.7); }
+
+  /* Vision detection boxes drawn on the shelf */
+  .gd-box {
+    position: absolute;
+    border-radius: 5px;
+    pointer-events: none;
+  }
+  .gd-box::after {
+    content: "";
+    position: absolute;
+    top: -5px; left: -5px;
+    width: 11px; height: 11px;
+    border-radius: 999px;
+    background: inherit;
+  }
+  .gd-box--ai {
+    border: 2.5px solid var(--gd-ai);
+    background: var(--gd-ai);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 6px 24px rgba(0,0,0,0.28);
+  }
+  .gd-box--ai::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: rgba(22,196,127,0.16);
+    border-radius: 3px;
+  }
+  .gd-box--maria {
+    border: 2.5px dashed var(--gd-maria);
+    background: var(--gd-maria);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 6px 24px rgba(0,0,0,0.28);
+  }
+  .gd-box--maria::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: rgba(83,84,237,0.18);
+    border-radius: 3px;
+  }
+  /* keep the corner dot solid color, not the translucent fill */
+  .gd-box { background: transparent; }
+  .gd-box--ai::after { background: var(--gd-ai); }
+  .gd-box--maria::after { background: var(--gd-maria); }
+
+  /* Annotation cards */
+  .gd-cards {
+    position: absolute;
+    left: 40px; right: 40px; bottom: 40px;
+    display: flex; flex-direction: column;
+    gap: 16px;
+  }
+  .gd-card {
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(10px);
+    border-radius: 18px;
+    padding: 20px 24px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.32);
+    max-width: 520px;
+  }
+  .gd-card--ai { border-left: 6px solid var(--gd-ai); }
+  .gd-card--maria { border-left: 6px solid var(--gd-maria); }
+  .gd-card__head {
+    display: flex; align-items: center; gap: 11px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .gd-card--ai .gd-card__head { color: #0E8F5B; }
+  .gd-card--maria .gd-card__head { color: var(--wisy-indigo); }
+  .gd-card__dot {
+    width: 11px; height: 11px; border-radius: 999px;
+  }
+  .gd-card--ai .gd-card__dot { background: var(--gd-ai); }
+  .gd-card--maria .gd-card__dot { background: var(--gd-maria); }
+  .gd-card__count {
+    margin-left: auto;
+    font-size: 17px;
+    color: var(--fg-3);
+    letter-spacing: 0.08em;
+  }
+  .gd-card__list {
+    margin: 0; padding: 0; list-style: none;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .gd-card__list li {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--fg-1);
+    line-height: 1.25;
+  }
+  .gd-card__list li .pin {
+    flex-shrink: 0;
+    width: 7px; height: 7px; border-radius: 999px;
+  }
+  .gd-card--ai .gd-card__list li .pin { background: var(--gd-ai); }
+  .gd-card--maria .gd-card__list li .pin { background: var(--gd-maria); }
+
+  .s-ground__right {
+    padding: 80px 96px 96px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    background: var(--wisy-white);
+    box-sizing: border-box;
+    height: 100%;
+  }
+  .s-ground__title h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 68px;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    color: var(--wisy-black);
+    margin: 24px 0 0;
+    text-wrap: balance;
+  }
+  .s-ground__title h2 em { font-style: normal; color: var(--wisy-indigo); }
+
+  .s-ground__chaos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .s-ground__chaosRow {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--wisy-gray-50);
+    border-radius: 16px;
+    padding: 14px 20px;
+    border: 1px solid var(--border-1);
+  }
+  .s-ground__chaosRow .app {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: grid; place-items: center;
+    font-family: var(--font-mono); font-weight: 600;
+    color: var(--wisy-white);
+    font-size: 18px;
+  }
+  .s-ground__chaosRow .lbl {
+    font-size: 24px;
+    color: var(--fg-1);
+    font-weight: 500;
+  }
+  .s-ground__chaosRow .tag {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--wisy-danger);
+  }
+
+  .s-ground__quote {
+    margin-top: auto;
+    padding-top: 28px;
+    border-top: 2px solid var(--wisy-black);
+    font-size: 26px;
+    line-height: 1.3;
+    color: var(--fg-1);
+    font-weight: 500;
+  }
+  .s-ground__quote em { font-style: normal; background: var(--wisy-lime); padding: 2px 10px 4px; border-radius: 8px; }
+
+  /* ============================================================
+     SLIDE 4 — AIR
+     ============================================================ */
+  .s-air {
+    height: 100%;
+    background: var(--wisy-white);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .s-air__left {
+    padding: var(--pad-top) 80px var(--pad-bottom) var(--pad-x);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .s-air__brand {
+    display: flex; align-items: baseline; gap: 28px;
+    margin-top: 28px;
+  }
+  .s-air__brand .name {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 156px;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--wisy-indigo);
+  }
+  .s-air__brand .expand {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    max-width: 220px;
+    line-height: 1.45;
+  }
+  .s-air__pitch {
+    font-size: 40px;
+    line-height: 1.15;
+    color: var(--fg-1);
+    margin: 32px 0 0;
+    max-width: 640px;
+    font-weight: 500;
+    text-wrap: balance;
+  }
+  .s-air__pitch em { font-style: normal; color: var(--wisy-indigo); }
+  .s-air__sub {
+    font-size: 23px;
+    line-height: 1.45;
+    color: var(--fg-2);
+    margin: 20px 0 0;
+    max-width: 600px;
+    text-wrap: pretty;
+  }
+  .s-air__sub em { font-style: normal; color: var(--wisy-indigo); font-weight: 600; }
+
+  .s-air__bars {
+    display: flex; flex-direction: column; gap: 22px;
+    margin-top: 32px;
+  }
+  .s-air__bar { }
+  .s-air__bar .row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .s-air__bar .row .l {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+  .s-air__bar .row .r {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--fg-1);
+  }
+  .s-air__bar .track {
+    height: 18px;
+    background: var(--wisy-gray-50);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+  .s-air__bar .fill {
+    height: 100%;
+    border-radius: 999px;
+  }
+  .s-air__bar.legacy .fill { width: 32%; background: var(--wisy-gray-500); }
+  .s-air__bar.air .fill {
+    width: 96%;
+    background: linear-gradient(90deg, var(--wisy-indigo) 0%, var(--wisy-indigo) 70%, var(--wisy-lime) 100%);
+  }
+  .s-air__caps {
+    display: flex; gap: 12px; margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .s-air__cap {
+    border: 1px solid var(--border-1);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+  .s-air__integ {
+    display: flex; align-items: center; gap: 16px;
+    margin-top: 22px;
+  }
+  .s-air__integLbl {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+  .s-air__integName {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--fg-1);
+  }
+  .s-air__integDot {
+    width: 5px; height: 5px; border-radius: 999px;
+    background: var(--wisy-gray-500);
+  }
+
+  .s-air__right {
+    position: relative;
+    background:
+      linear-gradient(135deg, var(--wisy-indigo-100) 0%, var(--wisy-white) 100%);
+    overflow: hidden;
+  }
+  .s-air__right::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(83,84,237,0.10), transparent 55%);
+  }
+  /* Background grid */
+  .s-air__right::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(83,84,237,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(83,84,237,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+  }
+
+  /* Device hub */
+  .s-air__hub {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  .s-air__hubSvg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Center AIR core */
+  .s-air__core {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 240px; height: 240px;
+    border-radius: 999px;
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 30px 80px rgba(83,84,237,0.30), 0 0 0 8px rgba(83,84,237,0.08);
+    z-index: 3;
+    overflow: hidden;
+  }
+  .s-air__core::before,
+  .s-air__core::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    border: 2px solid var(--wisy-indigo);
+    opacity: 0;
+  }
+  [data-deck-active] .s-air__core::before { animation: airCoreRing 2600ms var(--ease-out) 200ms infinite; }
+  [data-deck-active] .s-air__core::after  { animation: airCoreRing 2600ms var(--ease-out) 1500ms infinite; }
+  @keyframes airCoreRing {
+    0%   { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(1.5); }
+  }
+  .s-air__coreLbl {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--wisy-indigo-200);
+  }
+  .s-air__coreMark {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 72px;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--wisy-lime);
+  }
+  .s-air__coreStatus {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--wisy-lime);
+    margin-top: 4px;
+  }
+  .s-air__coreStatus .d {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: var(--wisy-lime);
+  }
+  [data-deck-active] .s-air__coreStatus .d {
+    animation: airBlink 1100ms steps(2, end) infinite;
+  }
+  @keyframes airBlink {
+    50% { opacity: 0.3; }
+  }
+
+  /* Device cards */
+  .s-air__dev {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 168px;
+    background: var(--wisy-white);
+    border: 1px solid var(--border-1);
+    border-radius: 18px;
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+  }
+  [data-deck-active] .s-air__dev {
+    animation: airDevIn 540ms var(--ease-out) forwards;
+  }
+  [data-deck-active] .s-air__dev.d1 { animation-delay: 80ms; }
+  [data-deck-active] .s-air__dev.d2 { animation-delay: 200ms; }
+  [data-deck-active] .s-air__dev.d3 { animation-delay: 320ms; }
+  [data-deck-active] .s-air__dev.d4 { animation-delay: 440ms; }
+  [data-deck-active] .s-air__dev.d5 { animation-delay: 560ms; }
+  @keyframes airDevIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.86); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  .s-air__devIcon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: var(--wisy-indigo-100);
+    color: var(--wisy-indigo);
+    display: grid; place-items: center;
+    margin-top: 2px;
+  }
+  .s-air__devIcon svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Real-world device photo */
+  .s-air__devPhoto {
+    display: none;
+    width: 92px; height: 92px;
+    object-fit: cover;
+    border-radius: var(--air-photo-radius, 16px);
+    margin-top: 2px;
+    background: var(--wisy-indigo-100);
+  }
+  [data-air-media="photos"] .s-air__devIcon { display: none; }
+  [data-air-media="photos"] .s-air__devPhoto { display: block; }
+  [data-air-media="icons"]  .s-air__devPhoto { display: none; }
+  [data-air-media="icons"]  .s-air__devIcon  { display: grid; }
+  .s-air__devLbl {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--fg-1);
+    line-height: 1.1;
+  }
+  .s-air__devMeta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    line-height: 1.3;
+  }
+  .s-air__devOnline {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--wisy-success);
+    font-weight: 600;
+  }
+  .s-air__devOnline .d {
+    width: 5px; height: 5px;
+    border-radius: 999px;
+    background: var(--wisy-success);
+  }
+  [data-deck-active] .s-air__devOnline .d {
+    animation: airDevDot calc(1600ms / var(--air-speed, 1)) ease-out infinite;
+  }
+  [data-deck-active] .s-air__dev.d2 .s-air__devOnline .d { animation-delay: -200ms; }
+  [data-deck-active] .s-air__dev.d3 .s-air__devOnline .d { animation-delay: -400ms; }
+  [data-deck-active] .s-air__dev.d4 .s-air__devOnline .d { animation-delay: -600ms; }
+  [data-deck-active] .s-air__dev.d5 .s-air__devOnline .d { animation-delay: -800ms; }
+  @keyframes airDevDot {
+    0%   { box-shadow: 0 0 0 0 rgba(31,138,91,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(31,138,91,0); }
+    100% { box-shadow: 0 0 0 0 rgba(31,138,91,0); }
+  }
+
+  /* SVG connection lines + traveling pulses */
+  .s-air__hubPath {
+    fill: none;
+    stroke: rgba(83,84,237,0.22);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  .s-air__hubPathLive {
+    fill: none;
+    stroke: var(--wisy-indigo);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 4 10;
+    vector-effect: non-scaling-stroke;
+  }
+  [data-deck-active] .s-air__hubPathLive {
+    animation: airDash calc(1400ms / var(--air-speed, 1)) linear infinite;
+  }
+  @keyframes airDash {
+    to { stroke-dashoffset: -140; }
+  }
+
+  /* Caption strip at bottom of right panel */
+  .s-air__caption {
+    position: absolute;
+    left: 56px; right: 56px; bottom: 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px;
+    background: var(--wisy-white);
+    border: 1px solid var(--border-1);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    z-index: 4;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+  .s-air__caption .lbl {
+    color: var(--wisy-indigo);
+    font-weight: 600;
+  }
+  .s-air__caption .v {
+    color: var(--wisy-black);
+    font-weight: 600;
+  }
+  .s-air__caption em {
+    font-style: normal;
+    color: var(--wisy-lime-700);
+  }
+
+  /* ============================================================
+     SLIDE 5 — AI Agents
+     ============================================================ */
+  .s-agents {
+    height: 100%;
+    box-sizing: border-box;
+    background: var(--wisy-indigo-100);
+    padding: 72px var(--pad-x) 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .s-agents__head {
+    display: grid; grid-template-columns: 1fr 600px;
+    gap: 80px;
+    align-items: end;
+  }
+  .s-agents__head h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 64px;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    color: var(--wisy-black);
+    margin: 20px 0 0;
+    text-wrap: balance;
+  }
+  .s-agents__head h2 em { font-style: normal; color: var(--wisy-indigo); }
+  .s-agents__head p {
+    font-size: 24px;
+    line-height: 1.4;
+    color: var(--fg-2);
+    margin: 0;
+  }
+
+  .s-agents__flow {
+    display: grid;
+    grid-template-columns: 340px 1fr 340px;
+    gap: 48px;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .s-agents__phone {
+    position: relative;
+    width: 340px; height: 640px;
+    border-radius: 40px;
+    background: #000;
+    padding: 12px;
+    box-shadow: 0 30px 60px rgba(16,24,64,0.18);
+    margin: 0 auto;
+    align-self: center;
+    box-sizing: border-box;
+  }
+  .s-agents__phone::after {
+    content: ""; position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 26px; border-radius: 14px; background: #000; z-index: 2;
+  }
+  .s-agents__phoneScreen {
+    width: 100%; height: 100%;
+    box-sizing: border-box;
+    border-radius: 32px;
+    background: linear-gradient(180deg, #f7f7fb 0%, white 100%);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 56px 18px 18px;
+    gap: 12px;
+  }
+  .s-agents__phoneHead {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 4px;
+  }
+  .s-agents__phoneHead .b {
+    background: var(--wisy-black); color: var(--wisy-white);
+    padding: 5px 10px; border-radius: 999px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 600;
+  }
+  .s-agents__phoneHead .t {
+    font-family: var(--font-sans); font-weight: 600; font-size: 16px;
+    color: var(--fg-1);
+  }
+  .s-agents__photoCap {
+    height: 130px;
+    border-radius: 16px;
+    background: url("https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=600&q=80&auto=format&fit=crop") center/cover;
+    position: relative;
+    overflow: hidden;
+  }
+  .s-agents__photoCap .check {
+    position: absolute; right: 10px; bottom: 10px;
+    background: var(--wisy-lime); color: var(--wisy-black);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-family: var(--font-mono); font-size: 9px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .s-agents__phoneSub {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--fg-3);
+    margin-top: 4px;
+  }
+  .s-agents__action {
+    border: 1px solid var(--border-1);
+    border-radius: 14px;
+    padding: 10px 12px;
+    background: white;
+    display: flex; flex-direction: column; gap: 4px;
+    flex-shrink: 0;
+  }
+  .s-agents__action.top {
+    border: 1.5px solid var(--wisy-indigo);
+    background: var(--wisy-indigo-100);
+  }
+  .s-agents__action .ahdr {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-3);
+  }
+  .s-agents__action .ahdr .pri { color: var(--wisy-indigo); font-weight: 600; }
+  .s-agents__action.top .ahdr .pri { color: var(--wisy-indigo); }
+  .s-agents__action .ttl {
+    font-family: var(--font-sans); font-weight: 600; font-size: 13px;
+    color: var(--fg-1); line-height: 1.25;
+  }
+  .s-agents__action .rev {
+    font-family: var(--font-mono); font-size: 11px; color: var(--wisy-success);
+    font-weight: 600;
+  }
+
+  /* Middle: flow with arrows */
+  .s-agents__pipe {
+    display: flex; flex-direction: column;
+    gap: 14px;
+    justify-content: center;
+  }
+  .s-agents__step {
+    background: var(--wisy-white);
+    border-radius: 20px;
+    border: 1px solid var(--border-1);
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .s-agents__step .num {
+    width: 48px; height: 48px;
+    border-radius: 999px;
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 20px;
+  }
+  .s-agents__step .num.lime { background: var(--wisy-lime); color: var(--wisy-black); }
+  .s-agents__step .num.indigo { background: var(--wisy-indigo); color: var(--wisy-white); }
+  .s-agents__step .body { min-width: 0; }
+  .s-agents__step .body .lbl {
+    font-family: var(--font-mono); font-size: 14px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-3); margin: 0 0 4px;
+  }
+  .s-agents__step .body .t {
+    font-family: var(--font-sans); font-weight: 500;
+    font-size: 24px; color: var(--fg-1); line-height: 1.2;
+    margin: 0;
+  }
+  .s-agents__step .body .t em { font-style: normal; color: var(--wisy-indigo); font-weight: 600; }
+  .s-agents__step .time {
+    font-family: var(--font-mono);
+    font-size: 20px; font-weight: 600;
+    color: var(--wisy-success);
+    white-space: nowrap;
+  }
+  .s-agents__pipeArrow {
+    text-align: center;
+    color: var(--wisy-indigo);
+    font-size: 22px;
+    margin: -6px 0;
+    line-height: 1;
+  }
+
+  /* Right column: outcomes */
+  .s-agents__out {
+    display: flex; flex-direction: column;
+    gap: 14px;
+    justify-content: center;
+  }
+  .s-agents__out h3 {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    margin: 0 0 4px;
+    font-weight: 500;
+  }
+  .s-agents__outCard {
+    background: var(--wisy-white);
+    border: 1px solid var(--border-1);
+    border-radius: 18px;
+    padding: 20px 24px;
+  }
+  .s-agents__outCard .v {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--wisy-black);
+    margin: 0 0 8px;
+  }
+  .s-agents__outCard .v .small { font-size: 28px; }
+  .s-agents__outCard .l {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    color: var(--fg-2);
+    line-height: 1.35;
+    margin: 0;
+  }
+  .s-agents__outCard.dark {
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    border: none;
+  }
+  .s-agents__outCard.dark .v { color: var(--wisy-lime); }
+  .s-agents__outCard.dark .l { color: rgba(255,255,255,0.75); }
+
+  /* ============================================================
+     SLIDE 6 — HQI
+     ============================================================ */
+  .s-hqi {
+    height: 100%;
+    position: relative;
+    background: var(--wisy-white);
+    padding: var(--pad-top) var(--pad-x) var(--pad-bottom);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 40px;
+  }
+  .s-hqi__pushAlert {
+    position: absolute;
+    top: 32px;
+    right: var(--pad-x);
+    z-index: 10;
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    border-radius: 16px;
+    padding: 16px 22px;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .s-hqi__pushAlertHead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--wisy-lime);
+  }
+  .s-hqi__pushAlertHead .d {
+    width: 8px; height: 8px;
+    border-radius: 999px;
+    background: var(--wisy-lime);
+    display: inline-block;
+  }
+  [data-deck-active] .s-hqi__pushAlertHead .d {
+    animation: airDevDot 1600ms ease-out infinite;
+  }
+  .s-hqi__pushAlertBody {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--wisy-white);
+    margin: 0;
+    line-height: 1.3;
+  }
+  .s-hqi__pushAlertRev {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--wisy-lime);
+    font-weight: 600;
+    margin: 0;
+  }
+  .s-hqi__head {    display: grid;
+    grid-template-columns: 1fr 600px;
+    gap: 80px;
+    align-items: end;
+  }
+  .s-hqi__head h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--wisy-black);
+    margin: 24px 0 0;
+    text-wrap: balance;
+  }
+  .s-hqi__head h2 em { font-style: normal; color: var(--wisy-indigo); }
+  .s-hqi__head p {
+    font-size: 26px;
+    line-height: 1.4;
+    color: var(--fg-2);
+    margin: 0;
+  }
+  .s-hqi__head p strong { color: var(--fg-1); font-weight: 600; }
+
+  /* Mac window */
+  .s-hqi__mac {
+    background: #eaeaef;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-1);
+    display: flex;
+    flex-direction: column;
+  }
+  .s-hqi__macBar {
+    background: linear-gradient(180deg, #f6f6fa 0%, #ececf2 100%);
+    height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 8px;
+    border-bottom: 1px solid #d8d8e0;
+  }
+  .s-hqi__macBar .dot {
+    width: 13px; height: 13px; border-radius: 999px;
+    background: #ddd;
+  }
+  .s-hqi__macBar .dot.r { background: #ff5f57; }
+  .s-hqi__macBar .dot.y { background: #ffbd2e; }
+  .s-hqi__macBar .dot.g { background: #28c941; }
+  .s-hqi__macBar .url {
+    margin-left: 20px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--fg-3);
+    letter-spacing: 0.04em;
+  }
+  .s-hqi__macBar .url b { color: var(--wisy-indigo); font-weight: 600; }
+
+  .s-hqi__app {
+    flex: 1;
+    background: var(--wisy-white);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+  }
+  .s-hqi__sidebar {
+    background: #fafafd;
+    border-right: 1px solid var(--border-1);
+    padding: 28px 20px;
+    display: flex; flex-direction: column;
+    gap: 6px;
+  }
+  .s-hqi__sidebar .logo {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--wisy-indigo);
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+  }
+  .s-hqi__sidebar .nav {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--fg-2);
+    cursor: pointer;
+  }
+  .s-hqi__sidebar .nav.active {
+    background: var(--wisy-indigo-100);
+    color: var(--wisy-indigo);
+    font-weight: 600;
+  }
+  .s-hqi__sidebar .nav .ic {
+    width: 16px; height: 16px; border-radius: 4px;
+    background: var(--fg-3);
+    opacity: 0.4;
+  }
+  .s-hqi__sidebar .nav.active .ic { background: var(--wisy-indigo); opacity: 1; }
+
+  .s-hqi__main {
+    padding: 28px 32px;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 22px;
+    overflow: hidden;
+  }
+  .s-hqi__topRow {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .s-hqi__topRow h3 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--fg-1);
+    margin: 0;
+  }
+  .s-hqi__topRow h3 span { color: var(--fg-3); font-weight: 400; font-size: 18px; }
+  .s-hqi__topRow .live {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--wisy-indigo-100);
+    color: var(--wisy-indigo);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .s-hqi__topRow .live::before {
+    content: ""; width: 8px; height: 8px; border-radius: 999px;
+    background: var(--wisy-success);
+    box-shadow: 0 0 0 4px rgba(31,138,91,0.18);
+  }
+
+  .s-hqi__kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .s-hqi__kpi {
+    border: 1px solid var(--border-1);
+    border-radius: 16px;
+    padding: 18px 20px;
+    background: var(--wisy-white);
+  }
+  .s-hqi__kpi .l {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    margin: 0 0 8px;
+  }
+  .s-hqi__kpi .v {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--fg-1);
+    margin: 0;
+  }
+  .s-hqi__kpi .d {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 6px;
+    color: var(--wisy-success);
+    font-weight: 600;
+  }
+  .s-hqi__kpi .d.bad { color: var(--wisy-danger); }
+
+  .s-hqi__panels {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 18px;
+    min-height: 0;
+  }
+  .s-hqi__panel {
+    border: 1px solid var(--border-1);
+    border-radius: 16px;
+    padding: 20px;
+    background: var(--wisy-white);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .s-hqi__panel h4 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    margin: 0 0 16px;
+    color: var(--fg-1);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .s-hqi__panel h4 .pill {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--wisy-gray-50);
+    color: var(--fg-2);
+    padding: 4px 10px;
+    border-radius: 999px;
+    height: auto;
+    font-weight: 500;
+  }
+  /* Heatmap */
+  .s-hqi__heat {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 4px;
+    height: 100%;
+  }
+  .s-hqi__heat span {
+    border-radius: 4px;
+    background: var(--wisy-indigo-100);
+  }
+  /* Alerts list */
+  .s-hqi__alerts {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .s-hqi__alert {
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--wisy-gray-50);
+  }
+  .s-hqi__alert .bar { width: 4px; height: 100%; min-height: 34px; border-radius: 4px; background: var(--wisy-indigo); }
+  .s-hqi__alert.warn .bar { background: var(--wisy-warning); }
+  .s-hqi__alert.danger .bar { background: var(--wisy-danger); }
+  .s-hqi__alert .body { font-family: var(--font-sans); font-size: 14px; color: var(--fg-1); font-weight: 500; line-height: 1.3; }
+  .s-hqi__alert .body small { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-3); margin-top: 2px; }
+  .s-hqi__alert .rev { font-family: var(--font-mono); font-weight: 600; font-size: 14px; color: var(--wisy-success); white-space: nowrap; }
+
+  /* Floating call-outs */
+  .s-hqi__callout {
+    position: absolute;
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 5;
+  }
+
+  /* ============================================================
+     SLIDE 7 — Convergence / Agentic flow
+     ============================================================ */
+  .s-conv {
+    height: 100%;
+    box-sizing: border-box;
+    background:
+      radial-gradient(circle at 50% 60%, rgba(83,84,237,0.06), transparent 60%),
+      var(--wisy-gray-50);
+    padding: 64px var(--pad-x) 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Background grid */
+  .s-conv::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(83,84,237,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(83,84,237,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  .s-conv__head {
+    position: relative;
+    z-index: 2;
+  }
+  .s-conv__head h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 64px;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: var(--wisy-black);
+    margin: 14px 0 12px;
+    text-wrap: balance;
+    max-width: 1180px;
+  }
+  .s-conv__head h2 em { font-style: normal; color: var(--wisy-indigo); }
+  .s-conv__head p {
+    font-size: 22px;
+    color: var(--fg-2);
+    line-height: 1.4;
+    margin: 0;
+    max-width: 1100px;
+  }
+
+  .s-conv__diagram {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    z-index: 2;
+  }
+  .s-conv__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Streams column (left) */
+  .s-conv__streams {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 2;
+  }
+  .s-conv__stream {
+    background: var(--wisy-white);
+    border: 1px solid var(--border-1);
+    border-radius: 14px;
+    padding: 12px 18px;
+    display: grid;
+    grid-template-columns: 36px 1fr 14px;
+    gap: 14px;
+    align-items: center;
+    box-shadow: var(--shadow-xs);
+  }
+  [data-deck-active] .s-conv__stream {
+    animation: convStreamIn 480ms var(--ease-out) forwards;
+  }
+  [data-deck-active] .s-conv__stream:nth-child(1) { animation-delay: 60ms; }
+  [data-deck-active] .s-conv__stream:nth-child(2) { animation-delay: 80ms; }
+  [data-deck-active] .s-conv__stream:nth-child(3) { animation-delay: 160ms; }
+  [data-deck-active] .s-conv__stream:nth-child(4) { animation-delay: 240ms; }
+  [data-deck-active] .s-conv__stream:nth-child(5) { animation-delay: 320ms; }
+  @keyframes convStreamIn {
+    from { opacity: 0; transform: translateX(-24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .s-conv__stream .icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--wisy-white);
+    letter-spacing: 0;
+  }
+  .s-conv__stream:nth-child(1) .icon { background: var(--wisy-indigo); }
+  .s-conv__stream:nth-child(2) .icon { background: var(--wisy-lime); color: var(--wisy-black); }
+  .s-conv__stream:nth-child(3) .icon { background: var(--wisy-indigo-200); color: var(--wisy-indigo-800); }
+  .s-conv__stream:nth-child(4) .icon { background: var(--wisy-black); }
+  .s-conv__stream:nth-child(5) .icon { background: var(--wisy-success); }
+  .s-conv__stream .lbl {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    margin: 0 0 2px;
+  }
+  .s-conv__stream .ttl {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--fg-1);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .s-conv__stream .live {
+    width: 8px; height: 8px;
+    border-radius: 999px;
+    background: var(--wisy-success);
+    box-shadow: 0 0 0 0 rgba(31,138,91,0.5);
+  }
+  [data-deck-active] .s-conv__stream .live {
+    animation: convDotPulse 1800ms ease-out infinite;
+  }
+  @keyframes convDotPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(31,138,91,0.6); }
+    70%  { box-shadow: 0 0 0 10px rgba(31,138,91,0); }
+    100% { box-shadow: 0 0 0 0 rgba(31,138,91,0); }
+  }
+
+  /* Central agent core */
+  .s-conv__core {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 360px;
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    border-radius: 28px;
+    padding: 26px 26px 22px;
+    text-align: left;
+    box-shadow: 0 30px 80px rgba(83,84,237,0.32), 0 0 0 6px rgba(83,84,237,0.06);
+    z-index: 3;
+    overflow: hidden;
+  }
+  [data-deck-active] .s-conv__core {
+    animation: convCoreIn 720ms var(--ease-out) 220ms forwards;
+  }
+  @keyframes convCoreIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  /* Pulse ring behind core */
+  .s-conv__core::before,
+  .s-conv__core::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100%; height: 100%;
+    border: 1.5px solid var(--wisy-indigo);
+    border-radius: 28px;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    pointer-events: none;
+  }
+  [data-deck-active] .s-conv__core::before { animation: convRing 2400ms var(--ease-out) 800ms infinite; }
+  [data-deck-active] .s-conv__core::after  { animation: convRing 2400ms var(--ease-out) 1600ms infinite; }
+  @keyframes convRing {
+    0%   { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0;   transform: translate(-50%, -50%) scale(1.45); }
+  }
+
+  .s-conv__coreHead {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .s-conv__coreMark {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--wisy-indigo);
+    color: var(--wisy-white);
+    display: grid; place-items: center;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-transform: lowercase;
+  }
+  .s-conv__coreLbl {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--wisy-indigo-200);
+  }
+  .s-conv__coreStatus {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--wisy-lime);
+  }
+  .s-conv__coreStatus .d {
+    width: 6px; height: 6px; border-radius: 999px;
+    background: var(--wisy-lime);
+  }
+  [data-deck-active] .s-conv__coreStatus .d {
+    animation: convBlink 1200ms steps(2, end) infinite;
+  }
+  @keyframes convBlink {
+    50% { opacity: 0.25; }
+  }
+
+  .s-conv__coreV {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--wisy-white);
+    margin: 0 0 12px;
+  }
+  .s-conv__coreV em { font-style: normal; color: var(--wisy-lime); }
+
+  /* Throughput meter + sparkline */
+  .s-conv__coreMeter {
+    margin-bottom: 14px;
+  }
+  .s-conv__coreMeterTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .s-conv__coreMeterTop .l {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--wisy-indigo-200);
+  }
+  .s-conv__coreMeterTop .v {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--wisy-white);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .s-conv__coreMeterTop .v em {
+    font-style: normal;
+    color: var(--wisy-lime);
+    font-size: 24px;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+  }
+  .s-conv__coreMeterTop .v .u {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .s-conv__spark {
+    display: grid;
+    grid-template-columns: repeat(18, 1fr);
+    gap: 3px;
+    height: 26px;
+    align-items: end;
+  }
+  .s-conv__spark span {
+    display: block;
+    background: var(--wisy-indigo-300);
+    border-radius: 2px;
+    height: var(--h, 30%);
+    transform-origin: bottom;
+  }
+  [data-deck-active] .s-conv__spark span {
+    animation: convSpark 1800ms var(--ease-out) infinite alternate;
+  }
+  [data-deck-active] .s-conv__spark span:nth-child(3n)   { animation-delay: 100ms; background: var(--wisy-lime); }
+  [data-deck-active] .s-conv__spark span:nth-child(5n)   { animation-delay: 200ms; }
+  [data-deck-active] .s-conv__spark span:nth-child(4n+1) { animation-delay: 300ms; }
+  [data-deck-active] .s-conv__spark span:nth-child(7n)   { animation-delay: 50ms; background: var(--wisy-lime); }
+  @keyframes convSpark {
+    from { transform: scaleY(0.6); }
+    to   { transform: scaleY(1.0); }
+  }
+
+  /* Sub-agents */
+  .s-conv__agents {
+    display: flex; flex-direction: column; gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .s-conv__agent {
+    display: grid;
+    grid-template-columns: 8px 1fr auto 70px;
+    gap: 10px;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(255,255,255,0.92);
+    letter-spacing: 0.02em;
+  }
+  .s-conv__agent .dot {
+    width: 8px; height: 8px;
+    border-radius: 999px;
+    background: var(--wisy-lime);
+    box-shadow: 0 0 0 0 rgba(221,244,91,0.5);
+  }
+  [data-deck-active] .s-conv__agent .dot {
+    animation: convAgentPulse 1400ms var(--ease-out) infinite;
+  }
+  [data-deck-active] .s-conv__agent:nth-child(1) .dot { animation-duration: 1100ms; }
+  [data-deck-active] .s-conv__agent:nth-child(2) .dot { animation-duration: 1500ms; }
+  [data-deck-active] .s-conv__agent:nth-child(3) .dot { animation-duration: 1800ms; }
+  [data-deck-active] .s-conv__agent.idle .dot { animation: none; background: rgba(255,255,255,0.25); }
+  @keyframes convAgentPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(221,244,91,0.55); }
+    70%  { box-shadow: 0 0 0 6px rgba(221,244,91,0); }
+    100% { box-shadow: 0 0 0 0 rgba(221,244,91,0); }
+  }
+  .s-conv__agent .nm {
+    color: rgba(255,255,255,0.95);
+  }
+  .s-conv__agent.idle .nm { color: rgba(255,255,255,0.55); }
+  .s-conv__agent .rate {
+    color: var(--wisy-lime);
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .s-conv__agent.idle .rate {
+    color: var(--wisy-indigo-200);
+    font-weight: 400;
+  }
+  .s-conv__agent .rate em {
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+  }
+  .s-conv__agent .bar {
+    width: 70px; height: 4px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+  .s-conv__agent .bar i {
+    display: block;
+    height: 100%;
+    width: var(--w, 50%);
+    background: var(--wisy-lime);
+    border-radius: 999px;
+    transform-origin: left;
+  }
+  [data-deck-active] .s-conv__agent .bar i {
+    animation: convAgentBar 2200ms var(--ease-in-out) infinite;
+  }
+  [data-deck-active] .s-conv__agent:nth-child(1) .bar i { animation-duration: 1900ms; }
+  [data-deck-active] .s-conv__agent:nth-child(2) .bar i { animation-duration: 2600ms; animation-delay: -300ms; }
+  [data-deck-active] .s-conv__agent:nth-child(3) .bar i { animation-duration: 2200ms; animation-delay: -500ms; }
+  [data-deck-active] .s-conv__agent.idle .bar i { animation: none; opacity: 0.5; background: var(--wisy-indigo-300); }
+  @keyframes convAgentBar {
+    0%, 100% { transform: scaleX(0.65); }
+    50%      { transform: scaleX(1.0); }
+  }
+
+  /* Activity log (ticker inside core) */
+  .s-conv__log {
+    margin-top: 12px;
+    height: 72px;
+    overflow: hidden;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 8px;
+    position: relative;
+    -webkit-mask: linear-gradient(180deg, transparent 0%, #000 25%, #000 75%, transparent 100%);
+            mask: linear-gradient(180deg, transparent 0%, #000 25%, #000 75%, transparent 100%);
+  }
+  .s-conv__logRow {
+    display: grid;
+    grid-template-columns: 88px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.4;
+    height: 22px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .s-conv__logRow .t {
+    color: rgba(255,255,255,0.35);
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+  .s-conv__logRow .m {
+    color: rgba(255,255,255,0.9);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .s-conv__logRow .m em {
+    font-style: normal;
+    color: var(--wisy-indigo-200);
+  }
+  .s-conv__logRow .v {
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .s-conv__logRow .v.ok { color: var(--wisy-success); }
+  .s-conv__logRow .v.hi { color: var(--wisy-lime); }
+
+  [data-deck-active] .s-conv__log .s-conv__logRow {
+    animation: convLogScroll 6s linear infinite;
+  }
+  [data-deck-active] .s-conv__log .s-conv__logRow.r0 { animation-delay: 0s; }
+  [data-deck-active] .s-conv__log .s-conv__logRow.r1 { animation-delay: -1s; }
+  [data-deck-active] .s-conv__log .s-conv__logRow.r2 { animation-delay: -2s; }
+  [data-deck-active] .s-conv__log .s-conv__logRow.r3 { animation-delay: -3s; }
+  [data-deck-active] .s-conv__log .s-conv__logRow.r4 { animation-delay: -4s; }
+  [data-deck-active] .s-conv__log .s-conv__logRow.r5 { animation-delay: -5s; }
+  @keyframes convLogScroll {
+    0%   { transform: translateY(72px); opacity: 0; }
+    10%  { opacity: 1; }
+    50%  { transform: translateY(0); opacity: 1; }
+    90%  { transform: translateY(-72px); opacity: 1; }
+    100% { transform: translateY(-72px); opacity: 0; }
+  }
+  .s-conv__log {
+    /* let absolute children stack */
+    position: relative;
+  }
+  .s-conv__log .s-conv__logRow {
+    position: absolute;
+    left: 0; right: 0;
+    top: 8px;
+  }
+
+  /* Outcomes column (right) */
+  .s-conv__outcomes {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-53%);
+    width: 384px;
+    z-index: 2;
+    background: #0a0a10;
+    border-radius: 46px;
+    padding: 13px;
+    box-shadow: 0 34px 90px rgba(10,10,30,0.45), inset 0 0 0 2px rgba(255,255,255,0.05);
+  }
+  .s-conv__phoneScreen {
+    position: relative;
+    background: var(--bg-2);
+    border-radius: 34px;
+    padding: 16px 14px;
+    display: flex; flex-direction: column; gap: 12px;
+    overflow: hidden;
+  }
+  .s-conv__notch {
+    position: absolute;
+    top: 9px; left: 50%; transform: translateX(-50%);
+    width: 104px; height: 7px;
+    border-radius: 999px;
+    background: #0a0a10;
+    z-index: 5;
+  }
+  .s-conv__phoneHead {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 6px 2px;
+  }
+  .s-conv__phoneHead .logo {
+    font-family: var(--font-sans);
+    font-weight: 700; font-size: 17px;
+    color: var(--wisy-indigo);
+    letter-spacing: -0.01em;
+  }
+  .s-conv__phoneHead .ctx {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-3);
+  }
+  .s-conv__phoneHead .live {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--wisy-success);
+  }
+  .s-conv__phoneHead .live::before {
+    content: ""; width: 7px; height: 7px; border-radius: 999px;
+    background: var(--wisy-success);
+  }
+
+  /* ── Output cards (the agentic layer's output) ── */
+  .s-conv__card {
+    background: var(--wisy-white);
+    border: 1px solid var(--border-1);
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+    padding: 18px;
+  }
+  [data-deck-active] .s-conv__card {
+    animation: convCardIn 520ms var(--ease-out) both;
+    animation-fill-mode: forwards;
+  }
+  [data-deck-active] .s-conv__card:nth-child(2) { animation-delay: 900ms; }
+  [data-deck-active] .s-conv__card:nth-child(3) { animation-delay: 1060ms; }
+  [data-deck-active] .s-conv__card:nth-child(4) { animation-delay: 1220ms; }
+  @keyframes convCardIn {
+    from { opacity: 0; transform: translateX(28px) scale(0.97); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  .s-conv__cardHead {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .s-conv__cardIcon {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    font-family: var(--font-sans);
+    font-weight: 700; font-size: 20px; line-height: 1;
+  }
+  .s-conv__cardIcon.crit { background: var(--wisy-indigo); color: var(--wisy-white); }
+  .s-conv__cardIcon.opt  { background: var(--wisy-indigo-100); color: var(--wisy-indigo); }
+  .s-conv__cardIcon.hq   { background: var(--wisy-indigo); color: var(--wisy-lime); }
+  .s-conv__cardKick {
+    font-family: var(--font-mono);
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-3); margin: 0 0 3px;
+  }
+  .s-conv__cardTitle {
+    font-family: var(--font-sans);
+    font-weight: 600; font-size: 21px; color: var(--fg-1);
+    margin: 0; line-height: 1.1;
+  }
+
+  /* Critical-issue revenue box */
+  .s-conv__revBox {
+    background: var(--bg-2);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .s-conv__revTop {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+  }
+  .s-conv__revTop .cur {
+    font-family: var(--font-mono); font-size: 16px; color: var(--fg-3);
+  }
+  .s-conv__revTop .pill {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--wisy-indigo);
+    background: var(--wisy-indigo-100);
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .s-conv__revFig {
+    font-family: var(--font-sans);
+    font-weight: 600; font-size: 44px; line-height: 1;
+    color: var(--fg-1); margin: 0 0 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .s-conv__revSub {
+    font-family: var(--font-sans);
+    font-size: 14px; color: var(--fg-2); margin: 0;
+  }
+  .s-conv__fix {
+    width: 100%; border: none; cursor: default;
+    background: var(--wisy-black); color: var(--wisy-white);
+    font-family: var(--font-sans); font-weight: 600; font-size: 16px;
+    padding: 14px; border-radius: 999px;
+  }
+
+  /* Optimization card (horizontal) */
+  .s-conv__card.opt {
+    display: grid;
+    grid-template-columns: 38px 1fr auto;
+    gap: 14px; align-items: center;
+  }
+  .s-conv__optDesc {
+    font-family: var(--font-sans); font-size: 14px;
+    color: var(--fg-2); margin: 4px 0 0;
+  }
+  .s-conv__optDesc strong { color: var(--fg-1); font-weight: 600; }
+  .s-conv__optVal {
+    font-family: var(--font-sans); font-weight: 600; font-size: 24px;
+    color: var(--wisy-indigo); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .s-conv__optVal .u {
+    font-family: var(--font-mono); font-size: 13px; color: var(--fg-3);
+    font-weight: 400;
+  }
+
+  /* HQ metrics grid */
+  .s-conv__metricGrid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .s-conv__metric {
+    background: var(--bg-2);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .s-conv__metric .m-l {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-3); margin: 0 0 4px;
+  }
+  .s-conv__metric .m-v {
+    font-family: var(--font-sans); font-weight: 600; font-size: 30px;
+    line-height: 1; color: var(--fg-1); margin: 0 0 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .s-conv__metric .m-s {
+    font-family: var(--font-sans); font-size: 12px; color: var(--fg-3); margin: 0;
+  }
+  .s-conv__metric .m-s.up { color: var(--wisy-success); font-weight: 500; }
+
+  .s-conv__out {
+    background: var(--wisy-white);
+    border-radius: 14px;
+    padding: 14px 20px;
+    border: 1px solid var(--border-1);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  [data-deck-active] .s-conv__out {
+    animation: convOutIn 480ms var(--ease-out) both;
+  }
+  [data-deck-active] .s-conv__out:nth-child(1) { animation-delay: 900ms; }
+  [data-deck-active] .s-conv__out:nth-child(2) { animation-delay: 1050ms; }
+  [data-deck-active] .s-conv__out:nth-child(3) { animation-delay: 1200ms; }
+  [data-deck-active] .s-conv__out:nth-child(4) { animation-delay: 1350ms; }
+  @keyframes convOutIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .s-conv__out.hero {
+    background: var(--wisy-lime);
+    border: none;
+  }
+  .s-conv__out .v {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--wisy-black);
+    margin: 0;
+    white-space: nowrap;
+  }
+  .s-conv__out.hero .v { font-size: 44px; }
+  .s-conv__out .l {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    color: var(--fg-2);
+    line-height: 1.3;
+    margin: 0;
+  }
+  .s-conv__out.hero .l { color: var(--wisy-black); font-weight: 500; }
+
+  /* SVG paths */
+  /* Outcome value flash + sparkle when a new decision arrives */
+  .s-conv__out .v { transition: transform var(--dur-base) var(--ease-out); }
+  [data-deck-active] .s-conv__out .v {
+    animation: convOutFlash 4.4s var(--ease-out) infinite;
+  }
+  [data-deck-active] .s-conv__out:nth-child(1) .v { animation-delay: 0.0s; }
+  [data-deck-active] .s-conv__out:nth-child(2) .v { animation-delay: 1.1s; }
+  [data-deck-active] .s-conv__out:nth-child(3) .v { animation-delay: 2.2s; }
+  [data-deck-active] .s-conv__out:nth-child(4) .v { animation-delay: 3.3s; }
+  @keyframes convOutFlash {
+    0%, 92%, 100% { transform: scale(1); }
+    4%  { transform: scale(1.08); }
+    10% { transform: scale(1); }
+  }
+  .s-conv__out {
+    position: relative;
+  }
+  .s-conv__out::after {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 0 rgba(83,84,237,0);
+    pointer-events: none;
+  }
+  [data-deck-active] .s-conv__out::after {
+    animation: convOutGlow 4.4s var(--ease-out) infinite;
+  }
+  [data-deck-active] .s-conv__out:nth-child(1)::after { animation-delay: 0.0s; }
+  [data-deck-active] .s-conv__out:nth-child(2)::after { animation-delay: 1.1s; }
+  [data-deck-active] .s-conv__out:nth-child(3)::after { animation-delay: 2.2s; }
+  [data-deck-active] .s-conv__out:nth-child(4)::after { animation-delay: 3.3s; }
+  @keyframes convOutGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(83,84,237,0); }
+    3%       { box-shadow: 0 0 0 4px rgba(83,84,237,0.18); }
+    12%      { box-shadow: 0 0 0 0 rgba(83,84,237,0); }
+  }
+  .s-conv__out.hero::after {
+    /* lime hero gets a lime glow */
+  }
+  [data-deck-active] .s-conv__out.hero::after {
+    animation-name: convOutGlowHero;
+  }
+  @keyframes convOutGlowHero {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(221,244,91,0); }
+    3%       { box-shadow: 0 0 0 6px rgba(221,244,91,0.45); }
+    12%      { box-shadow: 0 0 0 0 rgba(221,244,91,0); }
+  }
+
+  .s-conv__path {
+    fill: none;
+    stroke: rgba(83,84,237,0.22);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .s-conv__path.out { stroke: rgba(0,0,0,0.18); }
+  .s-conv__pathLive {
+    fill: none;
+    stroke: var(--wisy-indigo);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 4 12;
+    stroke-dashoffset: 0;
+    vector-effect: non-scaling-stroke;
+  }
+  [data-deck-active] .s-conv__pathLive {
+    animation: convDash 1600ms linear infinite;
+  }
+  @keyframes convDash {
+    to { stroke-dashoffset: -160; }
+  }
+  .s-conv__pathLive.out { stroke: var(--wisy-lime); }
+
+  .s-conv__legend {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--border-1);
+    padding-top: 18px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .s-conv__legend strong { color: var(--wisy-black); font-weight: 600; }
+
+  .s-conv__arrow {
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .s-conv__arrow svg { width: 100%; height: 2px; }
+  .s-conv__arrow .lbl {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ============================================================
+     SLIDE 8 — Credibility
+     ============================================================ */
+  .s-cred {
+    height: 100%;
+    box-sizing: border-box;
+    background: var(--wisy-black);
+    color: var(--wisy-white);
+    padding: 72px var(--pad-x) 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    position: relative;
+  }
+  .s-cred__head h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 64px;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: var(--wisy-white);
+    margin: 18px 0 0;
+    text-wrap: balance;
+    max-width: 1500px;
+  }
+  .s-cred__head h2 em { font-style: normal; color: var(--wisy-lime); }
+
+  .s-cred__body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 64px;
+    flex: 1;
+    min-height: 0;
+  }
+  .s-cred__context {
+    display: flex; flex-direction: column; gap: 28px;
+  }
+  .s-cred__context p {
+    font-family: var(--font-sans);
+    font-size: 30px;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.82);
+    margin: 0;
+    text-wrap: pretty;
+    max-width: 560px;
+  }
+  .s-cred__context p em {
+    font-style: normal;
+    color: var(--wisy-lime);
+    font-weight: 600;
+  }
+  .s-cred__context p strong {
+    color: var(--wisy-white);
+    font-weight: 600;
+  }
+
+  /* Team box (right) */
+  .s-cred__team {
+    width: 100%;
+    background: #0f0f10;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 28px;
+    padding: 60px 56px;
+  }
+  .s-cred__teamLbl {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--wisy-indigo-200);
+    margin: 0 0 32px;
+  }
+  .s-cred__teamGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 56px;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  .s-cred__member {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+  }
+  .s-cred__member img {
+    width: 210px; height: 210px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--wisy-white);
+    margin-bottom: 28px;
+  }
+  .s-cred__member .nm {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 1.12;
+    color: var(--wisy-white);
+    margin: 0 0 8px;
+    text-wrap: balance;
+    min-height: 62px;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .s-cred__member .ro {
+    font-family: var(--font-sans);
+    font-size: 20px;
+    line-height: 1.25;
+    color: rgba(255,255,255,0.62);
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .s-cred__member .em {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    color: var(--wisy-indigo-200);
+    margin: 0;
+  }
+
+  .s-cred__logos {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    padding: 24px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    flex-shrink: 0;
+  }
+  .s-cred__logo {
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    padding: 8px 16px;
+  }
+  .s-cred__logo:last-child { border-right: none; }
+  .s-cred__logo img {
+    height: 150px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .s-cred__logo small {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-top: 6px;
+    font-weight: 400;
+  }
+
+  /* ============================================================
+     SLIDE 9 — Social proof
+     ============================================================ */
+  .s-proof {
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-end;
+    background:
+      linear-gradient(90deg, rgba(8,8,16,0.10) 0%, rgba(8,8,16,0.28) 38%, rgba(8,8,16,0.72) 70%, rgba(8,8,16,0.88) 100%),
+      url("https://images.unsplash.com/photo-1584957109848-6e04fa733565?w=2000&q=80&auto=format&fit=crop") center/cover;
+  }
+  .s-proof__photo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .s-proof__photo .tag {
+    position: absolute;
+    top: 56px; left: 56px;
+    background: var(--wisy-white);
+    color: var(--wisy-black);
+    border-radius: 999px;
+    padding: 12px 20px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .s-proof__photo .tag .dot {
+    width: 8px; height: 8px; border-radius: 999px; background: var(--wisy-indigo);
+  }
+  .s-proof__photo .brandStamp {
+    position: absolute;
+    left: 56px; bottom: 56px;
+    color: var(--wisy-white);
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 56px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .s-proof__photo .brandStamp span {
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+    margin-top: 12px;
+  }
+
+  .s-proof__right {
+    position: relative;
+    z-index: 2;
+    width: 50%;
+    padding: 56px 64px 56px 56px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .s-proof__right .kicker { color: rgba(255,255,255,0.92); }
+  .s-proof__right .kicker .dot { background: var(--wisy-lime); }
+  .s-proof__head h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    color: var(--wisy-white);
+    margin: 14px 0 0;
+    text-wrap: balance;
+  }
+
+  .s-proof__quote {
+    background: var(--wisy-indigo-100);
+    border-radius: 20px;
+    padding: 20px 28px;
+    position: relative;
+  }
+  .s-proof__quote::before {
+    content: "“";
+    position: absolute;
+    top: -8px; left: 18px;
+    font-family: var(--font-sans);
+    font-size: 80px;
+    line-height: 1;
+    color: var(--wisy-indigo);
+    font-weight: 600;
+  }
+  .s-proof__quote p {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 21px;
+    line-height: 1.3;
+    color: var(--wisy-black);
+    margin: 0 0 12px;
+    padding-left: 8px;
+    text-wrap: balance;
+  }
+  .s-proof__quote .meta {
+    display: flex; align-items: center; gap: 14px;
+    padding-left: 8px;
+  }
+  .s-proof__quote .meta .av {
+    width: 40px; height: 40px; border-radius: 999px;
+    background: var(--wisy-indigo);
+    color: var(--wisy-white);
+    display: grid; place-items: center;
+    font-weight: 600; font-size: 15px;
+  }
+  .s-proof__quote .meta .who {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    color: var(--fg-1);
+    font-weight: 600;
+  }
+  .s-proof__quote .meta .who span {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  .s-proof__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+  }
+  .s-proof__stat .v {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--wisy-lime);
+    margin: 0 0 6px;
+  }
+  .s-proof__stat .l {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  /* ============================================================
+     SLIDE 10 — Bottom line
+     ============================================================ */
+  .s-close {
+    height: 100%;
+    box-sizing: border-box;
+    background: var(--wisy-white);
+    padding: 72px var(--pad-x) 72px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .s-close__head {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .s-close__hero {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 64px;
+    align-items: center;
+    flex: 1;
+    min-height: 0;
+  }
+  .s-close__num {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 360px;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+    color: var(--wisy-indigo);
+    margin: 0;
+    position: relative;
+  }
+  .s-close__num .x {
+    font-size: 200px;
+    color: var(--wisy-black);
+    margin-left: -8px;
+  }
+  .s-close__num .min {
+    position: absolute;
+    bottom: 24px; right: -8px;
+    transform: rotate(-4deg);
+    background: var(--wisy-lime);
+    color: var(--wisy-black);
+    padding: 8px 18px 12px;
+    border-radius: 14px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .s-close__right h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--wisy-black);
+    margin: 18px 0 0;
+    text-wrap: balance;
+  }
+  .s-close__right h2 em { font-style: normal; color: var(--wisy-indigo); }
+  .s-close__right .quote {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.3;
+    color: var(--wisy-white);
+    margin: 28px 0 0;
+    padding: 24px 28px;
+    background: var(--wisy-black);
+    border-radius: 20px;
+    text-wrap: balance;
+  }
+  .s-close__right .quote em { font-style: normal; color: var(--wisy-lime); }
+
+  .s-close__cta {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--border-1);
+    padding-top: 28px;
+    flex-shrink: 0;
+  }
+  .s-close__cta .who {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 24px;
+    color: var(--fg-1);
+  }
+  .s-close__cta .who span {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+  .s-close__cta .next {
+    display: flex; align-items: center; gap: 20px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+  }
+  .s-close__cta .next .btn {
+    background: var(--wisy-indigo);
+    color: var(--wisy-white);
+    padding: 16px 26px;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    font-size: 16px;
+    box-shadow: var(--shadow-indigo);
+  }
+
+  /* ============================================================
+     SLIDES 10–12 — Case studies
+     ============================================================ */
+  .s-case {
+    height: 100%;
+    box-sizing: border-box;
+    background: var(--wisy-white);
+    padding: 68px var(--pad-x) 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .s-case__head {
+    display: grid;
+    grid-template-columns: 1fr 600px;
+    gap: 72px;
+    align-items: end;
+  }
+  .s-case__head h2 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 58px;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    color: var(--wisy-black);
+    margin: 18px 0 0;
+    text-wrap: balance;
+  }
+  .s-case__head h2 em { font-style: normal; color: var(--wisy-indigo); }
+  .s-case__sub {
+    font-family: var(--font-sans);
+    font-size: 28px;
+    line-height: 1.32;
+    color: var(--fg-2);
+    margin: 0;
+    text-wrap: pretty;
+  }
+  .s-case__sub em { font-style: normal; color: var(--wisy-indigo); font-weight: 600; }
+
+  /* Dotted divider — echoes the source decks, in brand indigo */
+  .s-case__rule {
+    height: 5px;
+    flex-shrink: 0;
+    background-image: radial-gradient(circle, var(--wisy-indigo) 2.2px, transparent 2.7px);
+    background-size: 24px 5px;
+    background-repeat: repeat-x;
+    background-position: left center;
+  }
+
+  .s-case__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 64px;
+    row-gap: 38px;
+    flex: 1;
+    min-height: 0;
+  }
+  .s-case__sectionLbl {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--wisy-indigo);
+    margin: 0 0 24px;
+  }
+
+  /* Profile card (lavender brand tile) */
+  .s-case__profile {
+    background: var(--wisy-indigo-100);
+    border-radius: var(--radius-2xl);
+    padding: 36px 42px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .s-case__profileLbl {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-2);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .s-case__profileName {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--wisy-black);
+    margin: 2px 0 0;
+  }
+  .s-case__profileDiv {
+    height: 1px;
+    background: var(--wisy-indigo-200);
+    margin: 24px 0 28px;
+  }
+  .s-case__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  .s-case__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .s-case__statIcon { color: var(--wisy-indigo-300); }
+  .s-case__statIcon svg {
+    width: 46px; height: 46px;
+    stroke: currentColor; fill: none;
+    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .s-case__statNum {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 50px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--wisy-black);
+    margin: 0;
+  }
+  .s-case__statLbl {
+    font-family: var(--font-sans);
+    font-size: 22px;
+    color: var(--fg-2);
+    margin: 4px 0 0;
+    line-height: 1.2;
+  }
+
+  /* Use-case pills */
+  .s-case__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .s-case__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--wisy-gray-50);
+    border-radius: var(--radius-pill);
+    padding: 15px 26px;
+    font-family: var(--font-mono);
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--wisy-black);
+  }
+  .s-case__pill .d {
+    width: 12px; height: 12px; border-radius: 999px;
+    background: var(--wisy-indigo);
+    flex-shrink: 0;
+  }
+
+  /* Challenge list */
+  .s-case__list {
+    margin: 0; padding: 0; list-style: none;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .s-case__list li {
+    display: grid;
+    grid-template-columns: 12px 1fr;
+    gap: 18px;
+    align-items: start;
+    font-family: var(--font-sans);
+    font-size: 28px;
+    line-height: 1.3;
+    color: var(--fg-1);
+    text-wrap: pretty;
+  }
+  .s-case__list li::before {
+    content: "";
+    width: 12px; height: 12px;
+    border-radius: 999px;
+    background: var(--wisy-indigo);
+    margin-top: 12px;
+  }
+
+  /* Results cards */
+  .s-case__results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .s-case__result {
+    background: var(--wisy-gray-50);
+    border-radius: var(--radius-xl);
+    padding: 32px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 22px;
+  }
+  .s-case__resultVal {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 58px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--wisy-black);
+    background: var(--wisy-lime);
+    align-self: flex-start;
+    padding: 4px 12px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .s-case__resultVal.sm { font-size: 40px; }
+  .s-case__resultLbl {
+    font-family: var(--font-sans);
+    font-size: 27px;
+    line-height: 1.25;
+    color: var(--fg-1);
+    margin: 0;
+    text-wrap: pretty;
+  }
+</style>
+</head>
+<body>
+
+<deck-stage width="1920" height="1080" data-om-id="fafdacc8:5" style="--deck-rail-w: 188px;">
+
+  <!-- ====================================================
+       SLIDE 1 — Title
+       ==================================================== -->
+  <section data-label="01 Title" data-om-id="fafdacc8:6" data-screen-label="01 01 Title" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="0">
+    <div class="s-title" data-om-id="fafdacc8:7">
+      <div class="s-title__left" data-om-id="fafdacc8:8">
+        <div data-om-id="fafdacc8:9">
+          <p class="kicker" data-om-id="fafdacc8:10"><span class="dot" style="background-color: rgb(255, 255, 255)" data-om-id="fafdacc8:11"></span><span data-om-id="fafdacc8:12">
+</span></p>
+          <h1 class="s-title__wordmark" data-om-id="fafdacc8:13">wisy:</h1>
+        </div>
+        <div class="s-title__hook" data-om-id="fafdacc8:14">
+          <p class="t" data-om-id="fafdacc8:15">From <em data-om-id="fafdacc8:16">shelf</em> to <em data-om-id="fafdacc8:17">HQ</em>.<br data-om-id="fafdacc8:18">Real-time shelf intelligence.</p>
+          <p class="sub" data-om-id="fafdacc8:19">One system that sees your shelf, ranks what matters, and tells your teams what to do before they leave the store.</p>
+        </div>
+        <div class="s-title__meta" data-om-id="fafdacc8:20">
+          <span data-om-id="fafdacc8:21">For CPG &amp; Retail</span>
+          <span class="bar" style="background-color: rgb(255, 253, 253); color: rgb(255, 255, 255)" data-om-id="fafdacc8:22"></span>
+          <span data-om-id="fafdacc8:23">
+</span>
+          <span class="bar" style="color: rgb(247, 245, 245); background-color: rgb(255, 254, 254)" data-om-id="fafdacc8:24"></span>
+          <span data-om-id="fafdacc8:25">
+</span>
+        </div>
+      </div>
+      <div class="s-title__right" data-om-id="fafdacc8:26">
+        <div class="s-title__rightInner" data-om-id="fafdacc8:27">
+          <div class="s-title__mark" style="background-color: rgba(255, 255, 255, 0.004); border-radius: 0px" data-om-id="fafdacc8:28">
+</div>
+          <div class="s-title__statBlock" data-om-id="fafdacc8:29">
+            <p class="s-title__stat" data-om-id="fafdacc8:30">250 SKUs.<br data-om-id="fafdacc8:31">One photo.</p>
+            <p class="s-title__statLbl" data-om-id="fafdacc8:32">One photo. Multiple missions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 2 — $1.7 trillion
+       ==================================================== -->
+  <section data-label="02 Stakes" data-om-id="fafdacc8:33" data-screen-label="02 02 Stakes" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="1">
+    <div class="s-stakes" data-om-id="fafdacc8:34">
+      <p class="kicker" data-om-id="fafdacc8:35"><span class="dot" data-om-id="fafdacc8:36"></span><span data-om-id="fafdacc8:37">The stakes · Global retail execution</span></p>
+
+      <div class="s-stakes__hero" data-om-id="fafdacc8:38">
+        <p class="s-stakes__number" data-om-id="fafdacc8:39"><span class="unit" data-om-id="fafdacc8:40"></span></p>
+        <div class="s-stakes__copy" data-om-id="fafdacc8:41">
+          <h2 data-om-id="fafdacc8:42">lost every year to bad retail execution.</h2>
+          <p data-om-id="fafdacc8:43">For a $1B brand, that's <strong style="color: var(--wisy-lime)" data-om-id="fafdacc8:44">$20M&nbsp;–&nbsp;$50M</strong> walking off the shelf annually. Out-of-stocks. Wrong planogram. Missed promotion. Quiet, daily revenue leak.</p>
+        </div>
+      </div>
+
+      <div class="s-stakes__row" data-om-id="fafdacc8:45">
+        <div class="s-stakes__cell" data-om-id="fafdacc8:46">
+          <p class="n" data-om-id="fafdacc8:47"><span class="accent" data-om-id="fafdacc8:48">1 in 13</span></p>
+          <p class="l" data-om-id="fafdacc8:49">items a shopper looks for is out of stock and most walk away.</p>
+        </div>
+        <div class="s-stakes__cell" data-om-id="fafdacc8:50">
+          <p class="n" data-om-id="fafdacc8:51"><span class="accent" data-om-id="fafdacc8:52">~70%</span></p>
+          <p class="l" data-om-id="fafdacc8:53">of trade promotions fail to execute at the shelf as planned.</p>
+        </div>
+        <div class="s-stakes__cell" data-om-id="fafdacc8:54">
+          <p class="n" data-om-id="fafdacc8:55"><span class="accent" data-om-id="fafdacc8:56"></span></p>
+          <p class="l" data-om-id="fafdacc8:57">average lag from shelf reality to HQ dashboard.</p>
+        </div>
+        <div class="s-stakes__cell quote" data-om-id="fafdacc8:58">
+          <p class="q" data-om-id="fafdacc8:59">“This isn't a technology problem. It's a <strong data-om-id="fafdacc8:60">data</strong> problem.”</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 3 — Ground reality
+       ==================================================== -->
+  <section data-label="03 Ground reality" data-om-id="fafdacc8:61" data-screen-label="03 03 Ground reality" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="2">
+    <div class="s-ground" data-om-id="fafdacc8:62">
+      <div class="s-ground__photo" data-om-id="fafdacc8:63">
+        <div class="s-ground__rep">
+          <div class="nameRow">
+            <div class="avatar">MR</div>
+            <div class="name">
+              Maria R.
+              <span>Field rep &middot; Store 0412 &middot; 11:42</span>
+            </div>
+          </div>
+          <div class="s-ground__chips">
+            <span class="c">7 apps. 0 talking to each other.</span>
+            <span class="c warn">12 OOS suspected</span>
+            <span class="c">3 promos to audit</span>
+          </div>
+        </div>
+      </div>
+      <div class="s-ground__right" data-om-id="fafdacc8:91">
+        <div class="s-ground__title" data-om-id="fafdacc8:92">
+          <h2 data-om-id="fafdacc8:96">By the time HQ sees the data, the <em data-om-id="fafdacc8:97">shelf has already changed.</em></h2>
+        </div>
+
+        <div class="s-ground__chaos" data-om-id="fafdacc8:98">
+          <div class="s-ground__chaosRow" data-om-id="fafdacc8:99">
+            <div class="app" style="background: #2a72e0" data-om-id="fafdacc8:100">A</div>
+            <div class="lbl" style="font-weight: 500" data-om-id="fafdacc8:101">Audit app: manual photos and surveys</div>
+            <span class="tag" data-om-id="fafdacc8:102">no AI</span>
+          </div>
+          <div class="s-ground__chaosRow" data-om-id="fafdacc8:103">
+            <div class="app" style="background: #5e2cbf" data-om-id="fafdacc8:104">B</div>
+            <div class="lbl" data-om-id="fafdacc8:105">Route planner: separate login, no shelf context</div>
+            <span class="tag" data-om-id="fafdacc8:106">disconnected</span>
+          </div>
+          <div class="s-ground__chaosRow" data-om-id="fafdacc8:107">
+            <div class="app" style="background: #c0392b" data-om-id="fafdacc8:108">C</div>
+            <div class="lbl" data-om-id="fafdacc8:109">Trademarking promos not connected</div>
+            <span class="tag" data-om-id="fafdacc8:110">DISCONNECTED</span>
+          </div>
+          <div class="s-ground__chaosRow" data-om-id="fafdacc8:111">
+            <div class="app" style="background: #1a7a4a" data-om-id="fafdacc8:112">D</div>
+            <div class="lbl" data-om-id="fafdacc8:113">Check-in system: geo-tag + timestamp, no shelf context</div>
+            <span class="tag" data-om-id="fafdacc8:114">siloed</span>
+          </div>
+          <div class="s-ground__chaosRow" data-om-id="fafdacc8:115">
+            <div class="app" style="background: #8b4513" data-om-id="fafdacc8:116">E</div>
+            <div class="lbl" data-om-id="fafdacc8:117">Sell-in / sell-out reports: weekly export, 7-day lag</div>
+            <span class="tag" style="text-align: right" data-om-id="fafdacc8:118">stale data</span>
+          </div>
+        </div>
+
+        <p class="s-ground__quote" data-om-id="fafdacc8:119">Reps drown in tabs. Every minute on the phone is a secondary display not placed, a restock not done. The opportunity is gone before the photo reaches HQ.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 4 — AIR
+       ==================================================== -->
+  <section data-label="04 AIR" data-om-id="fafdacc8:120" data-screen-label="04 04 AIR" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="3">
+    <div class="s-air" data-air-media="icons" data-om-id="fafdacc8:121" style="--air-speed: 1; --air-photo-radius: 16px;">
+      <div class="s-air__left" data-om-id="fafdacc8:122">
+        <div data-om-id="fafdacc8:123">
+          <p class="kicker"><span class="dot"></span><span>The capture layer</span></p>
+          <div class="s-air__brand" data-om-id="fafdacc8:127">
+            <div class="name" data-om-id="fafdacc8:128"></div>
+            <div class="expand" data-om-id="fafdacc8:130">Agentic<br data-om-id="fafdacc8:131">Image<br data-om-id="fafdacc8:132">Recognition</div>
+          </div>
+          <p class="s-air__pitch" data-om-id="fafdacc8:133">The cheapest robot on every shelf, lives in the rep’s pocket.</p>
+          <p class="s-air__sub" data-om-id="fafdacc8:134">We <em data-om-id="fafdacc8:135">collect</em> primary data through vision and voice, <em data-om-id="fafdacc8:136">fuse</em> it with every existing signal from your ecosystem, and <em data-om-id="fafdacc8:137">act</em> on the unified picture.</p>
+        </div>
+
+        <div data-om-id="fafdacc8:138">
+          <div class="s-air__bars" data-om-id="fafdacc8:139">
+            <div class="s-air__bar legacy" data-om-id="fafdacc8:140">
+              <div class="row" data-om-id="fafdacc8:141">
+                <span class="l" data-om-id="fafdacc8:142">Legacy image recognition</span>
+                <span class="r" data-om-id="fafdacc8:143">Stops at HQ</span>
+              </div>
+              <div class="track" data-om-id="fafdacc8:144"><div class="fill" data-om-id="fafdacc8:145"></div></div>
+            </div>
+            <div class="s-air__bar air" data-om-id="fafdacc8:146">
+              <div class="row" data-om-id="fafdacc8:147">
+                <span class="l" data-om-id="fafdacc8:148">AIR — agentic, multimodal</span>
+                <span class="r" data-om-id="fafdacc8:149">Action at the shelf</span>
+              </div>
+              <div class="track" data-om-id="fafdacc8:150"><div class="fill" data-om-id="fafdacc8:151"></div></div>
+            </div>
+          </div>
+
+          <div class="s-air__caps" data-om-id="fafdacc8:152">
+            <span class="s-air__cap" data-om-id="fafdacc8:153">Phones &amp; tablets</span>
+            <span class="s-air__cap" data-om-id="fafdacc8:154">Cooler cameras</span>
+            <span class="s-air__cap" data-om-id="fafdacc8:155">IoT sensors</span>
+            <span class="s-air__cap" data-om-id="fafdacc8:156">Offline-first</span>
+          </div>
+
+          <div class="s-air__integ" data-om-id="fafdacc8:157">
+            <span class="s-air__integLbl" data-om-id="fafdacc8:158">Pushes to</span>
+            <span class="s-air__integName" data-om-id="fafdacc8:159">SAP</span>
+            <span class="s-air__integDot" data-om-id="fafdacc8:160"></span>
+            <span class="s-air__integName" data-om-id="fafdacc8:161">Salesforce</span>
+            <span class="s-air__integDot"></span>
+            <span class="s-air__integName">WhatsApp</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="s-air__right" data-om-id="fafdacc8:162">
+        <div class="s-air__hub" data-om-id="fafdacc8:163">
+          <svg class="s-air__hubSvg" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" data-om-id="fafdacc8:164">
+            <defs data-om-id="fafdacc8:165">
+              <path id="airL1" d="M500,500 L500,170" data-om-id="fafdacc8:166"></path>
+              <path id="airL2" d="M500,500 L814,398" data-om-id="fafdacc8:167"></path>
+              <path id="airL3" d="M500,500 L694,766" data-om-id="fafdacc8:168"></path>
+              <path id="airL4" d="M500,500 L306,766" data-om-id="fafdacc8:169"></path>
+              <path id="airL5" d="M500,500 L186,398" data-om-id="fafdacc8:170"></path>
+            </defs>
+
+            <use href="#airL1" class="s-air__hubPath" data-om-id="fafdacc8:171"></use>
+            <use href="#airL2" class="s-air__hubPath" data-om-id="fafdacc8:172"></use>
+            <use href="#airL3" class="s-air__hubPath" data-om-id="fafdacc8:173"></use>
+            <use href="#airL4" class="s-air__hubPath" data-om-id="fafdacc8:174"></use>
+            <use href="#airL5" class="s-air__hubPath" data-om-id="fafdacc8:175"></use>
+            <use href="#airL1" class="s-air__hubPathLive" data-om-id="fafdacc8:176"></use>
+            <use href="#airL2" class="s-air__hubPathLive" style="animation-delay:-150ms" data-om-id="fafdacc8:177"></use>
+            <use href="#airL3" class="s-air__hubPathLive" style="animation-delay:-300ms" data-om-id="fafdacc8:178"></use>
+            <use href="#airL4" class="s-air__hubPathLive" style="animation-delay:-450ms" data-om-id="fafdacc8:179"></use>
+            <use href="#airL5" class="s-air__hubPathLive" style="animation-delay:-600ms" data-om-id="fafdacc8:180"></use>
+
+            <!-- Pulses traveling from device → core (reversed direction via keyPoints 1→0) -->
+            <circle r="6" fill="#5354ED" data-om-id="fafdacc8:181"><animateMotion dur="1.80s" begin="0s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:182"><mpath href="#airL1" data-om-id="fafdacc8:183"></mpath></animateMotion></circle>
+            <circle r="6" fill="#5354ED" data-om-id="fafdacc8:184"><animateMotion dur="1.80s" begin="0.4s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:185"><mpath href="#airL2" data-om-id="fafdacc8:186"></mpath></animateMotion></circle>
+            <circle r="6" fill="#5354ED" data-om-id="fafdacc8:187"><animateMotion dur="1.80s" begin="0.8s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:188"><mpath href="#airL3" data-om-id="fafdacc8:189"></mpath></animateMotion></circle>
+            <circle r="6" fill="#5354ED" data-om-id="fafdacc8:190"><animateMotion dur="1.80s" begin="1.2s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:191"><mpath href="#airL4" data-om-id="fafdacc8:192"></mpath></animateMotion></circle>
+            <circle r="6" fill="#5354ED" data-om-id="fafdacc8:193"><animateMotion dur="1.80s" begin="1.6s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:194"><mpath href="#airL5" data-om-id="fafdacc8:195"></mpath></animateMotion></circle>
+
+            <circle r="6" fill="#DDF45B" stroke="#000" stroke-width="1" data-om-id="fafdacc8:196"><animateMotion dur="1.80s" begin="0.2s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:197"><mpath href="#airL1" data-om-id="fafdacc8:198"></mpath></animateMotion></circle>
+            <circle r="6" fill="#DDF45B" stroke="#000" stroke-width="1" data-om-id="fafdacc8:199"><animateMotion dur="1.80s" begin="0.6s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:200"><mpath href="#airL3" data-om-id="fafdacc8:201"></mpath></animateMotion></circle>
+            <circle r="6" fill="#DDF45B" stroke="#000" stroke-width="1" data-om-id="fafdacc8:202"><animateMotion dur="1.80s" begin="1.0s" repeatCount="indefinite" keyTimes="0;1" keyPoints="1;0" data-om-id="fafdacc8:203"><mpath href="#airL5" data-om-id="fafdacc8:204"></mpath></animateMotion></circle>
+          </svg>
+
+          <!-- Center AIR core -->
+          <div class="s-air__core" data-om-id="fafdacc8:205">
+            <span class="s-air__coreLbl" data-om-id="fafdacc8:206">Capture layer</span>
+            <span class="s-air__coreMark" data-om-id="fafdacc8:207">AIR</span>
+            <span class="s-air__coreStatus" data-om-id="fafdacc8:208"><span class="d" data-om-id="fafdacc8:209"></span>Multimodal</span>
+          </div>
+
+          <!-- Device 1: Phone (top) -->
+          <div class="s-air__dev d1" style="left:50%; top:17%;" data-om-id="fafdacc8:210">
+            <div class="s-air__devIcon" data-om-id="fafdacc8:211">
+              <svg viewBox="0 0 24 24" data-om-id="fafdacc8:212"><rect x="7" y="2.5" width="10" height="19" rx="2.2" data-om-id="fafdacc8:213"></rect><line x1="10.5" y1="18.5" x2="13.5" y2="18.5" data-om-id="fafdacc8:214"></line><line x1="10" y1="4.5" x2="14" y2="4.5" data-om-id="fafdacc8:215"></line></svg>
+            </div>
+            <img class="s-air__devPhoto" data-dev="phone" alt="Android phone" src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=320&amp;q=75&amp;auto=format&amp;fit=crop" data-om-id="fafdacc8:216">
+            <div class="s-air__devLbl" data-om-id="fafdacc8:217">Phone</div>
+            <div class="s-air__devMeta" data-om-id="fafdacc8:218">iOS / Android</div>
+            <div class="s-air__devOnline" data-om-id="fafdacc8:219"><span class="d" data-om-id="fafdacc8:220"></span>Live</div>
+          </div>
+
+          <!-- Device 2: Tablet (right) -->
+          <div class="s-air__dev d2" style="left:81.4%; top:39.8%;" data-om-id="fafdacc8:221">
+            <div class="s-air__devIcon" data-om-id="fafdacc8:222">
+              <svg viewBox="0 0 24 24" data-om-id="fafdacc8:223"><rect x="3" y="4.5" width="18" height="15" rx="2.2" data-om-id="fafdacc8:224"></rect><line x1="11" y1="17" x2="13" y2="17" data-om-id="fafdacc8:225"></line></svg>
+            </div>
+            <img class="s-air__devPhoto" data-dev="tablet" alt="Tablet" src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=320&amp;q=75&amp;auto=format&amp;fit=crop" data-om-id="fafdacc8:226">
+            <div class="s-air__devLbl" data-om-id="fafdacc8:227">Tablet</div>
+            <div class="s-air__devMeta" data-om-id="fafdacc8:228">In-store kiosk</div>
+            <div class="s-air__devOnline" data-om-id="fafdacc8:229"><span class="d" data-om-id="fafdacc8:230"></span>Live</div>
+          </div>
+
+          <!-- Device 3: IoT (bottom-right) -->
+          <div class="s-air__dev d3" style="left:69.4%; top:76.6%;" data-om-id="fafdacc8:231">
+            <div class="s-air__devIcon" data-om-id="fafdacc8:232">
+              <svg viewBox="0 0 24 24" data-om-id="fafdacc8:233"><rect x="4" y="7" width="16" height="11" rx="2" data-om-id="fafdacc8:234"></rect><path d="M9 7 V4.5" data-om-id="fafdacc8:235"></path><path d="M15 7 V4.5" data-om-id="fafdacc8:236"></path><circle cx="9" cy="12.5" r="1" data-om-id="fafdacc8:237"></circle><circle cx="15" cy="12.5" r="1" data-om-id="fafdacc8:238"></circle><line x1="8" y1="21" x2="16" y2="21" data-om-id="fafdacc8:239"></line></svg>
+            </div>
+            <img class="s-air__devPhoto" data-dev="iot" alt="Shelf sensor" src="https://images.unsplash.com/photo-1558002038-1055907df827?w=320&amp;q=75&amp;auto=format&amp;fit=crop" data-om-id="fafdacc8:240">
+            <div class="s-air__devLbl" data-om-id="fafdacc8:241">IoT sensor</div>
+            <div class="s-air__devMeta" data-om-id="fafdacc8:242">Shelf + weight</div>
+            <div class="s-air__devOnline" data-om-id="fafdacc8:243"><span class="d" data-om-id="fafdacc8:244"></span>Live</div>
+          </div>
+
+          <!-- Device 4: Cooler camera (bottom-left) -->
+          <div class="s-air__dev d4" style="left:30.6%; top:76.6%;" data-om-id="fafdacc8:245">
+            <div class="s-air__devIcon" data-om-id="fafdacc8:246">
+              <svg viewBox="0 0 24 24" data-om-id="fafdacc8:247"><rect x="3" y="7" width="18" height="13" rx="2" data-om-id="fafdacc8:248"></rect><path d="M8 7 L9.5 4.5 H14.5 L16 7" data-om-id="fafdacc8:249"></path><circle cx="12" cy="13.5" r="3.2" data-om-id="fafdacc8:250"></circle><circle cx="12" cy="13.5" r="1.2" fill="currentColor" stroke="none" data-om-id="fafdacc8:251"></circle></svg>
+            </div>
+            <img class="s-air__devPhoto" data-dev="cooler" alt="Cooler camera" src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=320&amp;q=75&amp;auto=format&amp;fit=crop" data-om-id="fafdacc8:252">
+            <div class="s-air__devLbl" data-om-id="fafdacc8:253">Cooler camera</div>
+            <div class="s-air__devMeta" data-om-id="fafdacc8:254">Always-on shelf</div>
+            <div class="s-air__devOnline" data-om-id="fafdacc8:255"><span class="d" data-om-id="fafdacc8:256"></span>Live</div>
+          </div>
+
+          <!-- Device 5: Meta glasses (left) -->
+          <div class="s-air__dev d5" style="left:18.6%; top:39.8%;" data-om-id="fafdacc8:257">
+            <div class="s-air__devIcon" data-om-id="fafdacc8:258">
+              <svg viewBox="0 0 24 24" data-om-id="fafdacc8:259"><circle cx="6.5" cy="14.5" r="3.8" data-om-id="fafdacc8:260"></circle><circle cx="17.5" cy="14.5" r="3.8" data-om-id="fafdacc8:261"></circle><path d="M10.3 14 L13.7 14" data-om-id="fafdacc8:262"></path><path d="M2.5 12 L4 11" data-om-id="fafdacc8:263"></path><path d="M21.5 12 L20 11" data-om-id="fafdacc8:264"></path></svg>
+            </div>
+            <img class="s-air__devPhoto" data-dev="glasses" alt="Meta Glasses" src="https://images.unsplash.com/photo-1577803645773-f96470509666?w=320&amp;q=75&amp;auto=format&amp;fit=crop" data-om-id="fafdacc8:265">
+            <div class="s-air__devLbl" data-om-id="fafdacc8:266">Meta Glasses</div>
+            <div class="s-air__devMeta" data-om-id="fafdacc8:267">Hands-free capture</div>
+            <div class="s-air__devOnline" data-om-id="fafdacc8:268"><span class="d" data-om-id="fafdacc8:269"></span>Live</div>
+          </div>
+        </div>
+
+        <div class="s-air__caption" data-om-id="fafdacc8:270">
+          <span class="lbl" data-om-id="fafdacc8:271">· AIR network</span>
+          <span data-om-id="fafdacc8:272">5 device classes · <em data-om-id="fafdacc8:273">one</em> capture layer · <span class="v" data-om-id="fafdacc8:274">offline-first</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 5 — Agents
+       ==================================================== -->
+  <section data-label="07 Convergence" data-om-id="fafdacc8:445" data-screen-label="07 07 Convergence" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="6" data-deck-active="">
+    <div class="s-conv" data-om-id="fafdacc8:446">
+      <div class="s-conv__head" data-om-id="fafdacc8:447">
+        <h2 data-om-id="fafdacc8:451">An <em data-om-id="fafdacc8:452">AI teammate</em> in every rep&rsquo;s pocket. The most intelligent action, every visit.</h2>
+        <p data-om-id="fafdacc8:453"></p>
+      </div>
+
+      <div class="s-conv__diagram" data-om-id="fafdacc8:454">
+        <!-- SVG layer: connection paths + traveling pulses -->
+        <svg class="s-conv__svg" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true" data-om-id="fafdacc8:455">
+          <defs data-om-id="fafdacc8:456">
+            <path id="cp-in-1" d="M214,171 C320,171 320,300 393,300" data-om-id="fafdacc8:457"></path>
+            <path id="cp-in-2" d="M214,235 C320,235 340,300 393,300" data-om-id="fafdacc8:458"></path>
+            <path id="cp-in-3" d="M214,300 L393,300" data-om-id="fafdacc8:459"></path>
+            <path id="cp-in-4" d="M214,365 C320,365 340,300 393,300" data-om-id="fafdacc8:460"></path>
+            <path id="cp-in-5" d="M214,429 C320,429 320,300 393,300" data-om-id="fafdacc8:461"></path>
+            <path id="cp-out-1" d="M607,300 C680,300 680,192 762,192" data-om-id="fafdacc8:462"></path>
+            <path id="cp-out-2" d="M607,300 C680,300 680,270 762,270" data-om-id="fafdacc8:463"></path>
+            <path id="cp-out-3" d="M607,300 C680,300 680,348 762,348" data-om-id="fafdacc8:464"></path>
+            <path id="cp-out-4" d="M607,300 C680,300 680,426 762,426" data-om-id="fafdacc8:465"></path>
+          </defs>
+
+          <!-- Static path lines -->
+          <use href="#cp-in-1" class="s-conv__path" data-om-id="fafdacc8:466"></use>
+          <use href="#cp-in-2" class="s-conv__path" data-om-id="fafdacc8:467"></use>
+          <use href="#cp-in-3" class="s-conv__path" data-om-id="fafdacc8:468"></use>
+          <use href="#cp-in-4" class="s-conv__path" data-om-id="fafdacc8:469"></use>
+          <use href="#cp-in-5" class="s-conv__path" data-om-id="fafdacc8:470"></use>
+          <use href="#cp-out-1" class="s-conv__path out" data-om-id="fafdacc8:471"></use>
+          <use href="#cp-out-2" class="s-conv__path out" data-om-id="fafdacc8:472"></use>
+          <use href="#cp-out-3" class="s-conv__path out" data-om-id="fafdacc8:473"></use>
+          <use href="#cp-out-4" class="s-conv__path out" data-om-id="fafdacc8:474"></use>
+
+          <!-- Animated dashed flow on top -->
+          <use href="#cp-in-1" class="s-conv__pathLive" data-om-id="fafdacc8:475"></use>
+          <use href="#cp-in-2" class="s-conv__pathLive" style="animation-delay:-200ms" data-om-id="fafdacc8:476"></use>
+          <use href="#cp-in-3" class="s-conv__pathLive" style="animation-delay:-400ms" data-om-id="fafdacc8:477"></use>
+          <use href="#cp-in-4" class="s-conv__pathLive" style="animation-delay:-600ms" data-om-id="fafdacc8:478"></use>
+          <use href="#cp-in-5" class="s-conv__pathLive" style="animation-delay:-800ms" data-om-id="fafdacc8:479"></use>
+          <use href="#cp-out-1" class="s-conv__pathLive out" style="animation-delay:-200ms" data-om-id="fafdacc8:480"></use>
+          <use href="#cp-out-2" class="s-conv__pathLive out" style="animation-delay:-500ms" data-om-id="fafdacc8:481"></use>
+          <use href="#cp-out-3" class="s-conv__pathLive out" style="animation-delay:-800ms" data-om-id="fafdacc8:482"></use>
+          <use href="#cp-out-4" class="s-conv__pathLive out" style="animation-delay:-1100ms" data-om-id="fafdacc8:483"></use>
+
+          <!-- Traveling token pulses: 3 per inbound path, staggered -->
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:484"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite" data-om-id="fafdacc8:485"><mpath href="#cp-in-1" data-om-id="fafdacc8:486"></mpath></animateMotion></circle>
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:487"><animateMotion dur="2.4s" begin="0.8s" repeatCount="indefinite" data-om-id="fafdacc8:488"><mpath href="#cp-in-1" data-om-id="fafdacc8:489"></mpath></animateMotion></circle>
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:490"><animateMotion dur="2.4s" begin="1.6s" repeatCount="indefinite" data-om-id="fafdacc8:491"><mpath href="#cp-in-1" data-om-id="fafdacc8:492"></mpath></animateMotion></circle>
+
+          <circle r="5" fill="#DDF45B" data-om-id="fafdacc8:493"><animateMotion dur="2.4s" begin="0.3s" repeatCount="indefinite" data-om-id="fafdacc8:494"><mpath href="#cp-in-2" data-om-id="fafdacc8:495"></mpath></animateMotion></circle>
+          <circle r="5" fill="#DDF45B" data-om-id="fafdacc8:496"><animateMotion dur="2.4s" begin="1.1s" repeatCount="indefinite" data-om-id="fafdacc8:497"><mpath href="#cp-in-2" data-om-id="fafdacc8:498"></mpath></animateMotion></circle>
+          <circle r="5" fill="#DDF45B" data-om-id="fafdacc8:499"><animateMotion dur="2.4s" begin="1.9s" repeatCount="indefinite" data-om-id="fafdacc8:500"><mpath href="#cp-in-2" data-om-id="fafdacc8:501"></mpath></animateMotion></circle>
+
+          <circle r="5" fill="#A8AFFF" data-om-id="fafdacc8:502"><animateMotion dur="2.4s" begin="0.15s" repeatCount="indefinite" data-om-id="fafdacc8:503"><mpath href="#cp-in-3" data-om-id="fafdacc8:504"></mpath></animateMotion></circle>
+          <circle r="5" fill="#A8AFFF" data-om-id="fafdacc8:505"><animateMotion dur="2.4s" begin="0.95s" repeatCount="indefinite" data-om-id="fafdacc8:506"><mpath href="#cp-in-3" data-om-id="fafdacc8:507"></mpath></animateMotion></circle>
+          <circle r="5" fill="#A8AFFF" data-om-id="fafdacc8:508"><animateMotion dur="2.4s" begin="1.75s" repeatCount="indefinite" data-om-id="fafdacc8:509"><mpath href="#cp-in-3" data-om-id="fafdacc8:510"></mpath></animateMotion></circle>
+
+          <circle r="5" fill="#000000" data-om-id="fafdacc8:511"><animateMotion dur="2.4s" begin="0.45s" repeatCount="indefinite" data-om-id="fafdacc8:512"><mpath href="#cp-in-4" data-om-id="fafdacc8:513"></mpath></animateMotion></circle>
+          <circle r="5" fill="#000000" data-om-id="fafdacc8:514"><animateMotion dur="2.4s" begin="1.25s" repeatCount="indefinite" data-om-id="fafdacc8:515"><mpath href="#cp-in-4" data-om-id="fafdacc8:516"></mpath></animateMotion></circle>
+          <circle r="5" fill="#000000" data-om-id="fafdacc8:517"><animateMotion dur="2.4s" begin="2.05s" repeatCount="indefinite" data-om-id="fafdacc8:518"><mpath href="#cp-in-4" data-om-id="fafdacc8:519"></mpath></animateMotion></circle>
+
+          <circle r="5" fill="#1F8A5B" data-om-id="fafdacc8:520"><animateMotion dur="2.4s" begin="0.6s" repeatCount="indefinite" data-om-id="fafdacc8:521"><mpath href="#cp-in-5" data-om-id="fafdacc8:522"></mpath></animateMotion></circle>
+          <circle r="5" fill="#1F8A5B" data-om-id="fafdacc8:523"><animateMotion dur="2.4s" begin="1.4s" repeatCount="indefinite" data-om-id="fafdacc8:524"><mpath href="#cp-in-5" data-om-id="fafdacc8:525"></mpath></animateMotion></circle>
+          <circle r="5" fill="#1F8A5B" data-om-id="fafdacc8:526"><animateMotion dur="2.4s" begin="2.2s" repeatCount="indefinite" data-om-id="fafdacc8:527"><mpath href="#cp-in-5" data-om-id="fafdacc8:528"></mpath></animateMotion></circle>
+
+          <!-- Outbound: lime pulses going to outcomes -->
+          <circle r="6" fill="#DDF45B" stroke="#000" stroke-width="1" data-om-id="fafdacc8:529"><animateMotion dur="2.2s" begin="0.7s" repeatCount="indefinite" data-om-id="fafdacc8:530"><mpath href="#cp-out-1" data-om-id="fafdacc8:531"></mpath></animateMotion></circle>
+          <circle r="6" fill="#DDF45B" stroke="#000" stroke-width="1" data-om-id="fafdacc8:532"><animateMotion dur="2.2s" begin="1.8s" repeatCount="indefinite" data-om-id="fafdacc8:533"><mpath href="#cp-out-1" data-om-id="fafdacc8:534"></mpath></animateMotion></circle>
+
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:535"><animateMotion dur="2.2s" begin="1.1s" repeatCount="indefinite" data-om-id="fafdacc8:536"><mpath href="#cp-out-2" data-om-id="fafdacc8:537"></mpath></animateMotion></circle>
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:538"><animateMotion dur="2.2s" begin="2.2s" repeatCount="indefinite" data-om-id="fafdacc8:539"><mpath href="#cp-out-2" data-om-id="fafdacc8:540"></mpath></animateMotion></circle>
+
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:541"><animateMotion dur="2.2s" begin="1.5s" repeatCount="indefinite" data-om-id="fafdacc8:542"><mpath href="#cp-out-3" data-om-id="fafdacc8:543"></mpath></animateMotion></circle>
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:544"><animateMotion dur="2.2s" begin="2.6s" repeatCount="indefinite" data-om-id="fafdacc8:545"><mpath href="#cp-out-3" data-om-id="fafdacc8:546"></mpath></animateMotion></circle>
+
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:547"><animateMotion dur="2.2s" begin="1.9s" repeatCount="indefinite" data-om-id="fafdacc8:548"><mpath href="#cp-out-4" data-om-id="fafdacc8:549"></mpath></animateMotion></circle>
+          <circle r="5" fill="#5354ED" data-om-id="fafdacc8:550"><animateMotion dur="2.2s" begin="3.0s" repeatCount="indefinite" data-om-id="fafdacc8:551"><mpath href="#cp-out-4" data-om-id="fafdacc8:552"></mpath></animateMotion></circle>
+
+          <!-- Labeled data packets (less frequent, narrative) -->
+          <g class="s-conv__packet" data-om-id="fafdacc8:553">
+            <rect x="-30" y="-9" width="60" height="18" rx="9" fill="#5354ED" stroke="#0c0c1e" stroke-width="1" data-om-id="fafdacc8:554"></rect>
+            <text x="0" y="3.5" text-anchor="middle" fill="#fff" font-size="10" font-family="Roboto Mono, monospace" font-weight="500" letter-spacing="0.5" data-om-id="fafdacc8:555">SKU-184</text>
+            <animateMotion dur="3.6s" begin="0.3s" repeatCount="indefinite" rotate="0" data-om-id="fafdacc8:556"><mpath href="#cp-in-3" data-om-id="fafdacc8:557"></mpath></animateMotion>
+          </g>
+          <g class="s-conv__packet" data-om-id="fafdacc8:558">
+            <rect x="-26" y="-9" width="52" height="18" rx="9" fill="#DDF45B" stroke="#0c0c1e" stroke-width="1" data-om-id="fafdacc8:559"></rect>
+            <text x="0" y="3.5" text-anchor="middle" fill="#000" font-size="10" font-family="Roboto Mono, monospace" font-weight="600" letter-spacing="0.5" data-om-id="fafdacc8:560">$840</text>
+            <animateMotion dur="3.6s" begin="1.8s" repeatCount="indefinite" data-om-id="fafdacc8:561"><mpath href="#cp-in-2" data-om-id="fafdacc8:562"></mpath></animateMotion>
+          </g>
+          <g class="s-conv__packet" data-om-id="fafdacc8:563">
+            <rect x="-22" y="-9" width="44" height="18" rx="9" fill="#fff" stroke="#0c0c1e" stroke-width="1" data-om-id="fafdacc8:564"></rect>
+            <text x="0" y="3.5" text-anchor="middle" fill="#000" font-size="10" font-family="Roboto Mono, monospace" font-weight="600" letter-spacing="0.5" data-om-id="fafdacc8:565">OOS</text>
+            <animateMotion dur="3.6s" begin="2.7s" repeatCount="indefinite" data-om-id="fafdacc8:566"><mpath href="#cp-in-1" data-om-id="fafdacc8:567"></mpath></animateMotion>
+          </g>
+
+          <!-- Outbound packets: ranked decisions -->
+          <g class="s-conv__packet" data-om-id="fafdacc8:568">
+            <rect x="-44" y="-10" width="88" height="20" rx="10" fill="#DDF45B" stroke="#0c0c1e" stroke-width="1" data-om-id="fafdacc8:569"></rect>
+            <text x="0" y="4" text-anchor="middle" fill="#000" font-size="10" font-family="Roboto Mono, monospace" font-weight="700" letter-spacing="0.5" data-om-id="fafdacc8:570">+$840 ↑ RANK 1</text>
+            <animateMotion dur="3.2s" begin="0.8s" repeatCount="indefinite" data-om-id="fafdacc8:571"><mpath href="#cp-out-1" data-om-id="fafdacc8:572"></mpath></animateMotion>
+          </g>
+          <g class="s-conv__packet" data-om-id="fafdacc8:573">
+            <rect x="-36" y="-10" width="72" height="20" rx="10" fill="#0c0c1e" stroke="#5354ED" stroke-width="1" data-om-id="fafdacc8:574"></rect>
+            <text x="0" y="4" text-anchor="middle" fill="#fff" font-size="10" font-family="Roboto Mono, monospace" font-weight="600" letter-spacing="0.5" data-om-id="fafdacc8:575">FIX OOS ×5</text>
+            <animateMotion dur="3.2s" begin="1.9s" repeatCount="indefinite" data-om-id="fafdacc8:576"><mpath href="#cp-out-2" data-om-id="fafdacc8:577"></mpath></animateMotion>
+          </g>
+          <g class="s-conv__packet" data-om-id="fafdacc8:578">
+            <rect x="-40" y="-10" width="80" height="20" rx="10" fill="#0c0c1e" stroke="#5354ED" stroke-width="1" data-om-id="fafdacc8:579"></rect>
+            <text x="0" y="4" text-anchor="middle" fill="#fff" font-size="10" font-family="Roboto Mono, monospace" font-weight="600" letter-spacing="0.5" data-om-id="fafdacc8:580">PROMO ✓ NS-12</text>
+            <animateMotion dur="3.2s" begin="2.6s" repeatCount="indefinite" data-om-id="fafdacc8:581"><mpath href="#cp-out-3" data-om-id="fafdacc8:582"></mpath></animateMotion>
+          </g>
+          <g class="s-conv__packet" data-om-id="fafdacc8:583">
+            <rect x="-36" y="-10" width="72" height="20" rx="10" fill="#0c0c1e" stroke="#5354ED" stroke-width="1" data-om-id="fafdacc8:584"></rect>
+            <text x="0" y="4" text-anchor="middle" fill="#fff" font-size="10" font-family="Roboto Mono, monospace" font-weight="600" letter-spacing="0.5" data-om-id="fafdacc8:585">REP → 1471</text>
+            <animateMotion dur="3.2s" begin="3.3s" repeatCount="indefinite" data-om-id="fafdacc8:586"><mpath href="#cp-out-4" data-om-id="fafdacc8:587"></mpath></animateMotion>
+          </g>
+        </svg>
+
+        <!-- Streams (left) -->
+        <div class="s-conv__streams" data-om-id="fafdacc8:588">
+          <div class="s-conv__stream" data-om-id="fafdacc8:589">
+            <div class="icon" data-om-id="fafdacc8:590">SI</div>
+            <div data-om-id="fafdacc8:591"><p class="lbl" data-om-id="fafdacc8:592">Stream 01 · ERP</p><p class="ttl" data-om-id="fafdacc8:593">Sell-in</p></div>
+            <span class="live" data-om-id="fafdacc8:594"></span>
+          </div>
+          <div class="s-conv__stream" data-om-id="fafdacc8:595">
+            <div class="icon" data-om-id="fafdacc8:596">SO</div>
+            <div data-om-id="fafdacc8:597"><p class="lbl" data-om-id="fafdacc8:598">Stream 02 · PoS</p><p class="ttl" data-om-id="fafdacc8:599">Sell-out</p></div>
+            <span class="live" data-om-id="fafdacc8:600"></span>
+          </div>
+          <div class="s-conv__stream" data-om-id="fafdacc8:601">
+            <div class="icon" data-om-id="fafdacc8:602">SH</div>
+            <div data-om-id="fafdacc8:603"><p class="lbl" data-om-id="fafdacc8:604">Stream 03 · AIR photos</p><p class="ttl" data-om-id="fafdacc8:605">Shelf truth</p></div>
+            <span class="live" data-om-id="fafdacc8:606"></span>
+          </div>
+          <div class="s-conv__stream" data-om-id="fafdacc8:607">
+            <div class="icon" data-om-id="fafdacc8:608">RT</div>
+            <div data-om-id="fafdacc8:609"><p class="lbl" data-om-id="fafdacc8:610">Stream 04 · Field GPS</p><p class="ttl" data-om-id="fafdacc8:611">Route &amp; visit</p></div>
+            <span class="live" data-om-id="fafdacc8:612"></span>
+          </div>
+          <div class="s-conv__stream" data-om-id="fafdacc8:613">
+            <div class="icon" data-om-id="fafdacc8:614">PR</div>
+            <div data-om-id="fafdacc8:615"><p class="lbl" data-om-id="fafdacc8:616">Stream 05 · Calendar</p><p class="ttl" data-om-id="fafdacc8:617">Promo &amp; price</p></div>
+            <span class="live" data-om-id="fafdacc8:618"></span>
+          </div>
+        </div>
+
+        <!-- Core agent orchestrator (center) -->
+        <div class="s-conv__core" data-om-id="fafdacc8:619">
+          <div class="s-conv__coreHead" data-om-id="fafdacc8:620">
+            <div class="s-conv__coreMark" data-om-id="fafdacc8:621">w:</div>
+            <span class="s-conv__coreLbl" data-om-id="fafdacc8:622">Agent orchestrator</span>
+            <span class="s-conv__coreStatus" data-om-id="fafdacc8:623"><span class="d" data-om-id="fafdacc8:624"></span>Live</span>
+          </div>
+
+          <div class="s-conv__coreMeter" data-om-id="fafdacc8:625">
+            <div class="s-conv__coreMeterTop" data-om-id="fafdacc8:626">
+              <span class="l" data-om-id="fafdacc8:627">Throughput</span>
+              <span class="v" data-om-id="fafdacc8:628"><em id="convActions" data-om-id="fafdacc8:629">3,052</em><span class="u" data-om-id="fafdacc8:630">actions / sec</span></span>
+            </div>
+            <div class="s-conv__spark" aria-hidden="true" data-om-id="fafdacc8:631">
+              <span style="--h:42%" data-om-id="fafdacc8:632"></span><span style="--h:58%" data-om-id="fafdacc8:633"></span><span style="--h:36%" data-om-id="fafdacc8:634"></span>
+              <span style="--h:64%" data-om-id="fafdacc8:635"></span><span style="--h:48%" data-om-id="fafdacc8:636"></span><span style="--h:72%" data-om-id="fafdacc8:637"></span>
+              <span style="--h:54%" data-om-id="fafdacc8:638"></span><span style="--h:88%" data-om-id="fafdacc8:639"></span><span style="--h:62%" data-om-id="fafdacc8:640"></span>
+              <span style="--h:76%" data-om-id="fafdacc8:641"></span><span style="--h:44%" data-om-id="fafdacc8:642"></span><span style="--h:82%" data-om-id="fafdacc8:643"></span>
+              <span style="--h:58%" data-om-id="fafdacc8:644"></span><span style="--h:94%" data-om-id="fafdacc8:645"></span><span style="--h:68%" data-om-id="fafdacc8:646"></span>
+              <span style="--h:78%" data-om-id="fafdacc8:647"></span><span style="--h:52%" data-om-id="fafdacc8:648"></span><span style="--h:86%" data-om-id="fafdacc8:649"></span>
+            </div>
+          </div>
+
+          <div class="s-conv__agents" data-om-id="fafdacc8:650">
+            <div class="s-conv__agent" data-om-id="fafdacc8:651">
+              <span class="dot" data-om-id="fafdacc8:652"></span>
+              <span class="nm" data-om-id="fafdacc8:653">oos-detector</span>
+              <span class="rate" data-om-id="fafdacc8:654"><em data-om-id="fafdacc8:655">3.4k</em>/s</span>
+              <span class="bar" data-om-id="fafdacc8:656"><i style="--w:78%" data-om-id="fafdacc8:657"></i></span>
+            </div>
+            <div class="s-conv__agent" data-om-id="fafdacc8:658">
+              <span class="dot" data-om-id="fafdacc8:659"></span>
+              <span class="nm" data-om-id="fafdacc8:660">planogram-fix</span>
+              <span class="rate" data-om-id="fafdacc8:661"><em data-om-id="fafdacc8:662">2.0k</em>/s</span>
+              <span class="bar" data-om-id="fafdacc8:663"><i style="--w:54%" data-om-id="fafdacc8:664"></i></span>
+            </div>
+            <div class="s-conv__agent" data-om-id="fafdacc8:665">
+              <span class="dot" data-om-id="fafdacc8:666"></span>
+              <span class="nm" data-om-id="fafdacc8:667">promo-audit</span>
+              <span class="rate" data-om-id="fafdacc8:668"><em data-om-id="fafdacc8:669">0.7k</em>/s</span>
+              <span class="bar" data-om-id="fafdacc8:670"><i style="--w:32%" data-om-id="fafdacc8:671"></i></span>
+            </div>
+            <div class="s-conv__agent idle" data-om-id="fafdacc8:672">
+              <span class="dot" data-om-id="fafdacc8:673"></span>
+              <span class="nm" data-om-id="fafdacc8:674">route-optimizer</span>
+              <span class="rate" data-om-id="fafdacc8:675">queued</span>
+              <span class="bar" data-om-id="fafdacc8:676"><i style="--w:8%" data-om-id="fafdacc8:677"></i></span>
+            </div>
+          </div>
+
+          <!-- Activity log -->
+          <div class="s-conv__log" aria-hidden="true" data-om-id="fafdacc8:678">
+            <div class="s-conv__logRow r0" data-om-id="fafdacc8:679"><span class="t" data-om-id="fafdacc8:680">12:42:18.901</span><span class="m" data-om-id="fafdacc8:681">photo → <em data-om-id="fafdacc8:682">store 0412</em></span><span class="v ok" data-om-id="fafdacc8:683">+187 SKUs</span></div>
+            <div class="s-conv__logRow r1" data-om-id="fafdacc8:684"><span class="t" data-om-id="fafdacc8:685">12:42:18.902</span><span class="m" data-om-id="fafdacc8:686">join: sell-out × shelf</span><span class="v ok" data-om-id="fafdacc8:687">+$840</span></div>
+            <div class="s-conv__logRow r2" data-om-id="fafdacc8:688"><span class="t" data-om-id="fafdacc8:689">12:42:18.903</span><span class="m" data-om-id="fafdacc8:690">oos-detector ✓ 5 fixes</span><span class="v hi" data-om-id="fafdacc8:691">ranked</span></div>
+            <div class="s-conv__logRow r3" data-om-id="fafdacc8:692"><span class="t" data-om-id="fafdacc8:693">12:42:18.904</span><span class="m" data-om-id="fafdacc8:694">action → <em data-om-id="fafdacc8:695">rep 1471</em></span><span class="v hi" data-om-id="fafdacc8:696">pushed</span></div>
+            <div class="s-conv__logRow r4" data-om-id="fafdacc8:697"><span class="t" data-om-id="fafdacc8:698">12:42:18.905</span><span class="m" data-om-id="fafdacc8:699">planogram-fix ✓</span><span class="v ok" data-om-id="fafdacc8:700">+$310</span></div>
+            <div class="s-conv__logRow r5" data-om-id="fafdacc8:701"><span class="t" data-om-id="fafdacc8:702">12:42:18.906</span><span class="m" data-om-id="fafdacc8:703">promo-audit → Nestlé</span><span class="v ok" data-om-id="fafdacc8:704">+$520</span></div>
+          </div>
+        </div>
+
+        <!-- Output cards (right) -->
+        <div class="s-conv__outcomes" data-om-id="fafdacc8:705">
+          <div class="s-conv__notch"></div>
+          <div class="s-conv__phoneScreen">
+            <div class="s-conv__phoneHead">
+              <span class="logo">wisy:</span>
+              <span class="ctx">Store 0412 &middot; Aisle 4</span>
+              <span class="live">Live</span>
+            </div>
+          <div class="s-conv__card critical" data-om-id="fafdacc8:706">
+            <div class="s-conv__cardHead" data-om-id="fafdacc8:707">
+              <span class="s-conv__cardIcon crit" data-om-id="fafdacc8:708">!</span>
+              <div data-om-id="fafdacc8:709">
+                <p class="s-conv__cardKick" data-om-id="fafdacc8:710">Critical issue</p>
+                <p class="s-conv__cardTitle" data-om-id="fafdacc8:711">Out-of-stock detected</p>
+              </div>
+            </div>
+            <div class="s-conv__revBox" data-om-id="fafdacc8:712">
+              <div class="s-conv__revTop" data-om-id="fafdacc8:713">
+                <span class="cur" data-om-id="fafdacc8:714">$</span>
+                <span class="pill" data-om-id="fafdacc8:715">Revenue impact</span>
+              </div>
+              <p class="s-conv__revFig" data-om-id="fafdacc8:716">$847</p>
+              <p class="s-conv__revSub" data-om-id="fafdacc8:717">Weekend sales at risk · Coconut Yogurt 150g</p>
+            </div>
+            <button class="s-conv__fix" type="button" data-om-id="fafdacc8:718">Fix now</button>
+          </div>
+
+          <div class="s-conv__card opt" data-om-id="fafdacc8:719">
+            <span class="s-conv__cardIcon opt" data-om-id="fafdacc8:720">↗</span>
+            <div class="s-conv__optBody" data-om-id="fafdacc8:721">
+              <p class="s-conv__cardKick" data-om-id="fafdacc8:722">Optimization</p>
+              <p class="s-conv__cardTitle" data-om-id="fafdacc8:723">Planogram opportunity</p>
+              <p class="s-conv__optDesc" data-om-id="fafdacc8:724">Adjust <strong data-om-id="fafdacc8:725">Peach Yogurt 150g</strong> placement</p>
+            </div>
+            <span class="s-conv__optVal" data-om-id="fafdacc8:726">+$120<span class="u" data-om-id="fafdacc8:727">/wk</span></span>
+          </div>
+
+          <div class="s-conv__card hq" data-om-id="fafdacc8:728">
+            <div class="s-conv__cardHead" data-om-id="fafdacc8:729">
+              <span class="s-conv__cardIcon hq" data-om-id="fafdacc8:730">≈</span>
+              <div data-om-id="fafdacc8:731">
+                <p class="s-conv__cardKick" data-om-id="fafdacc8:732">HQ dashboard</p>
+                <p class="s-conv__cardTitle" data-om-id="fafdacc8:733">Live metrics</p>
+              </div>
+            </div>
+            <div class="s-conv__metricGrid" data-om-id="fafdacc8:734">
+              <div class="s-conv__metric" data-om-id="fafdacc8:735"><p class="m-l" data-om-id="fafdacc8:736">Compliance</p><p class="m-v" data-om-id="fafdacc8:737">94%</p><p class="m-s up" data-om-id="fafdacc8:738">+2% today</p></div>
+              <div class="s-conv__metric" data-om-id="fafdacc8:739"><p class="m-l" data-om-id="fafdacc8:740">Tasks</p><p class="m-v" data-om-id="fafdacc8:741">127</p><p class="m-s" data-om-id="fafdacc8:742">completed</p></div>
+              <div class="s-conv__metric" data-om-id="fafdacc8:743"><p class="m-l" data-om-id="fafdacc8:744">Reps</p><p class="m-v" data-om-id="fafdacc8:745">34</p><p class="m-s" data-om-id="fafdacc8:746">active now</p></div>
+              <div class="s-conv__metric" data-om-id="fafdacc8:747"><p class="m-l" data-om-id="fafdacc8:748">Avg time</p><p class="m-v" data-om-id="fafdacc8:749">4.2m</p><p class="m-s" data-om-id="fafdacc8:750">per store</p></div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="s-conv__legend" style="border-color: rgba(255, 255, 255, 0.01)" data-om-id="fafdacc8:751">
+        <span data-om-id="fafdacc8:752">WISY: THE LAYER ABOVE YOUR STACK — NOT ANOTHER TAB INSIDE IT.</span>
+        <span data-om-id="fafdacc8:753">
+</span>
+      </div>
+    </div>
+  </section><section data-label="05 Agents" data-deck-skip data-om-id="fafdacc8:275" data-screen-label="05 05 Agents" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="4">
+    <div class="s-agents" data-om-id="fafdacc8:276">
+      <div class="s-agents__head" data-om-id="fafdacc8:277">
+        <div data-om-id="fafdacc8:278">
+          <h2 data-om-id="fafdacc8:282">An <em data-om-id="fafdacc8:283">AI teammate</em> in every rep’s pocket. The most intelligent action, every visit.</h2>
+        </div>
+        <p data-om-id="fafdacc8:284">Raw data is noise. Wisy's Agents apply your business rules to every photo and surface the three highest-revenue actions before the rep leaves the aisle.</p>
+      </div>
+
+      <div class="s-agents__flow" data-om-id="fafdacc8:285">
+        <!-- Left: phone -->
+        <div class="s-agents__phone" data-om-id="fafdacc8:286">
+          <div class="s-agents__phoneScreen" data-om-id="fafdacc8:287">
+            <div class="s-agents__phoneHead" data-om-id="fafdacc8:288">
+              <span class="b" data-om-id="fafdacc8:289">wisy:</span>
+              <span class="t" data-om-id="fafdacc8:290">Store 0412 · Aisle 4</span>
+            </div>
+            <div class="s-agents__photoCap" data-om-id="fafdacc8:291"><span class="check" data-om-id="fafdacc8:292">Captured</span></div>
+            <p class="s-agents__phoneSub" data-om-id="fafdacc8:293">Next best actions · ranked by revenue</p>
+            <div class="s-agents__action top" data-om-id="fafdacc8:294">
+              <div class="ahdr" data-om-id="fafdacc8:295"><span data-om-id="fafdacc8:296">01 · Refill</span><span class="pri" data-om-id="fafdacc8:297">Priority</span></div>
+              <div class="ttl" data-om-id="fafdacc8:298">Restock Coca-Cola 600ml — 4 facings missing</div>
+              <div class="rev" data-om-id="fafdacc8:299">+$840 / visit</div>
+            </div>
+            <div class="s-agents__action" data-om-id="fafdacc8:300">
+              <div class="ahdr" data-om-id="fafdacc8:301"><span data-om-id="fafdacc8:302">02 · Compliance</span><span data-om-id="fafdacc8:303">Promo</span></div>
+              <div class="ttl" data-om-id="fafdacc8:304">Rebuild promo end-cap — Nestlé summer block</div>
+              <div class="rev" data-om-id="fafdacc8:305">+$520 / visit</div>
+            </div>
+            <div class="s-agents__action" data-om-id="fafdacc8:306">
+              <div class="ahdr" data-om-id="fafdacc8:307"><span data-om-id="fafdacc8:308">03 · Planogram</span><span data-om-id="fafdacc8:309">Fix</span></div>
+              <div class="ttl" data-om-id="fafdacc8:310">Swap shelf 3 — competitor in your slot</div>
+              <div class="rev" data-om-id="fafdacc8:311">+$310 / visit</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle: pipeline -->
+        <div class="s-agents__pipe" data-om-id="fafdacc8:312">
+          <div class="s-agents__step" data-om-id="fafdacc8:313">
+            <div class="num" data-om-id="fafdacc8:314">1</div>
+            <div class="body" data-om-id="fafdacc8:315">
+              <p class="lbl" data-om-id="fafdacc8:316">Capture</p>
+              <p class="t" data-om-id="fafdacc8:317">One photo of the shelf</p>
+            </div>
+            <span class="time" data-om-id="fafdacc8:318">0:00</span>
+          </div>
+          <div class="s-agents__pipeArrow" data-om-id="fafdacc8:319">↓</div>
+          <div class="s-agents__step" data-om-id="fafdacc8:320">
+            <div class="num indigo" data-om-id="fafdacc8:321">2</div>
+            <div class="body" data-om-id="fafdacc8:322">
+              <p class="lbl" data-om-id="fafdacc8:323">Apply rules</p>
+              <p class="t" data-om-id="fafdacc8:324">Brand × planogram × promo × price</p>
+            </div>
+            <span class="time" data-om-id="fafdacc8:325">0:01</span>
+          </div>
+          <div class="s-agents__pipeArrow" data-om-id="fafdacc8:326">↓</div>
+          <div class="s-agents__step" data-om-id="fafdacc8:327">
+            <div class="num lime" data-om-id="fafdacc8:328">3</div>
+            <div class="body" data-om-id="fafdacc8:329">
+              <p class="lbl" data-om-id="fafdacc8:330">Rank &amp; act</p>
+              <p class="t" data-om-id="fafdacc8:331">Most Intelligent action</p>
+            </div>
+            <span class="time" data-om-id="fafdacc8:332">0:02</span>
+          </div>
+        </div>
+
+        <!-- Right: outcomes -->
+        <div class="s-agents__out" data-om-id="fafdacc8:333">
+          <h3 data-om-id="fafdacc8:334">Revenue at stake — every visit</h3>
+          <div class="s-agents__outCard dark" data-om-id="fafdacc8:335">
+            <p class="v" data-om-id="fafdacc8:336">$500<span class="small" data-om-id="fafdacc8:337"> opportunity</span></p>
+            <p class="l" data-om-id="fafdacc8:338">Total recoverable revenue per store visit if all 6 tasks are completed</p>
+          </div>
+          <div class="s-agents__outCard" data-om-id="fafdacc8:339">
+            <p class="v" data-om-id="fafdacc8:340">3 / 6</p>
+            <p class="l" data-om-id="fafdacc8:341">Tasks completed — store closed, cooler out of order, no access</p>
+          </div>
+          <div class="s-agents__outCard" style="border-color: var(--wisy-indigo);" data-om-id="fafdacc8:342">
+            <p class="v" style="color: var(--wisy-indigo);" data-om-id="fafdacc8:343">$300</p>
+            <p class="l" data-om-id="fafdacc8:344">Gap closed. Logged. Visible to HQ before you leave the parking lot.</p>
+          </div>
+          <div class="s-agents__outCard" style="background: var(--wisy-gray-50);" data-om-id="fafdacc8:345">
+            <p class="v" style="font-size: 28px; letter-spacing: -0.01em;" data-om-id="fafdacc8:346">−30 min</p>
+            <p class="l" data-om-id="fafdacc8:347">Per visit returned to the rep. That's time for one more store.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 6 — HQI
+       ==================================================== -->
+  <section data-label="06 HQI" data-om-id="fafdacc8:348" data-screen-label="06 06 HQI" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="5">
+    <div class="s-hqi" data-om-id="fafdacc8:349">
+      <div class="s-hqi__head" data-om-id="fafdacc8:350">
+        <div data-om-id="fafdacc8:351">
+          <p class="kicker" data-om-id="fafdacc8:352"><span class="dot" data-om-id="fafdacc8:353"></span><span data-om-id="fafdacc8:354">The intelligence layer</span></p>
+          <h2 data-om-id="fafdacc8:355">HQI:&nbsp;the shelf, wired straight to HQ.</h2>
+        </div>
+        <p data-om-id="fafdacc8:356">Not a dashboard. Not BI. <strong data-om-id="fafdacc8:357">HQI</strong> is the intelligence layer that pulls every shelf in every store into one live operating picture and pushes actions back down.</p>
+      </div>
+
+      <div class="s-hqi__mac" style="position: relative;" data-om-id="fafdacc8:364">
+        <div class="s-hqi__macBar" data-om-id="fafdacc8:365">
+          <span class="dot r" data-om-id="fafdacc8:366"></span><span class="dot y" data-om-id="fafdacc8:367"></span><span class="dot g" data-om-id="fafdacc8:368"></span>
+          <span class="url" data-om-id="fafdacc8:369">hq.wisy.ai &nbsp;/&nbsp; <b data-om-id="fafdacc8:370">execution / live</b></span>
+        </div>
+        <div class="s-hqi__app" data-om-id="fafdacc8:371">
+          <div class="s-hqi__sidebar" data-om-id="fafdacc8:372">
+            <div class="logo" data-om-id="fafdacc8:373">wisy:</div>
+            <div class="nav active" data-om-id="fafdacc8:374"><span class="ic" data-om-id="fafdacc8:375"></span>Live execution</div>
+            <div class="nav" data-om-id="fafdacc8:376"><span class="ic" data-om-id="fafdacc8:377"></span>Share of shelf</div>
+            <div class="nav" data-om-id="fafdacc8:378"><span class="ic" data-om-id="fafdacc8:379"></span>Out of stock</div>
+            <div class="nav" data-om-id="fafdacc8:380"><span class="ic" data-om-id="fafdacc8:381"></span>Planogram</div>
+            <div class="nav" data-om-id="fafdacc8:382"><span class="ic" data-om-id="fafdacc8:383"></span>Promotions</div>
+            <div class="nav" data-om-id="fafdacc8:384"><span class="ic" data-om-id="fafdacc8:385"></span>Field team</div>
+            <div class="nav" data-om-id="fafdacc8:386"><span class="ic" data-om-id="fafdacc8:387"></span>Routes</div>
+            <div class="nav" data-om-id="fafdacc8:388"><span class="ic" data-om-id="fafdacc8:389"></span>Reports</div>
+          </div>
+          <div class="s-hqi__main" data-om-id="fafdacc8:390">
+            <div class="s-hqi__topRow" data-om-id="fafdacc8:391">
+              <h3 data-om-id="fafdacc8:392">Live execution <span data-om-id="fafdacc8:393">· Latin America · 4,212 stores</span></h3>
+              <span class="live" data-om-id="fafdacc8:394">Live · 2s lag</span>
+            </div>
+            <div class="s-hqi__kpis" data-om-id="fafdacc8:395">
+              <div class="s-hqi__kpi" data-om-id="fafdacc8:396">
+                <p class="l" data-om-id="fafdacc8:397">On-shelf availability</p>
+                <p class="v" data-om-id="fafdacc8:398">94.1<small style="font-size: 22px" data-om-id="fafdacc8:399">%</small></p>
+                <p class="d" data-om-id="fafdacc8:400">▲ 2.4 vs. last week</p>
+              </div>
+              <div class="s-hqi__kpi" data-om-id="fafdacc8:401">
+                <p class="l" data-om-id="fafdacc8:402">Share of shelf</p>
+                <p class="v" data-om-id="fafdacc8:403">38.6<small style="font-size: 22px" data-om-id="fafdacc8:404">%</small></p>
+                <p class="d" data-om-id="fafdacc8:405">▲ 1.1</p>
+              </div>
+              <div class="s-hqi__kpi" data-om-id="fafdacc8:406">
+                <p class="l" data-om-id="fafdacc8:407">Promo compliance</p>
+                <p class="v" data-om-id="fafdacc8:408">81<small style="font-size: 22px" data-om-id="fafdacc8:409">%</small></p>
+                <p class="d bad" data-om-id="fafdacc8:410">▼ 3.2 — Region 04</p>
+              </div>
+              <div class="s-hqi__kpi" data-om-id="fafdacc8:411">
+                <p class="l" data-om-id="fafdacc8:412">Revenue at risk</p>
+                <p class="v" data-om-id="fafdacc8:413">$184<small style="font-size: 22px" data-om-id="fafdacc8:414">K</small></p>
+                <p class="d" data-om-id="fafdacc8:415">recoverable this week</p>
+              </div>
+            </div>
+
+            <div class="s-hqi__panels" data-om-id="fafdacc8:416">
+              <div class="s-hqi__panel" data-om-id="fafdacc8:417">
+                <h4 data-om-id="fafdacc8:418">Compliance heatmap — Red = critical, Yellow = at risk, Green = compliant<span class="pill" data-om-id="fafdacc8:419">last 24h</span></h4>
+                <div class="s-hqi__heat" id="heat" data-om-id="fafdacc8:420"><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(239, 83, 80);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(232, 245, 233);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 249, 196);"></span><span style="background: rgb(165, 214, 167);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(255, 204, 2);"></span><span style="background: rgb(255, 204, 2);"></span></div>
+              </div>
+              <div class="s-hqi__panel" data-om-id="fafdacc8:421">
+                <h4 data-om-id="fafdacc8:422">Ranked alerts — push to field<span class="pill" data-om-id="fafdacc8:423">12 open</span></h4>
+                <div class="s-hqi__alerts" data-om-id="fafdacc8:424">
+                  <div class="s-hqi__alert danger" data-om-id="fafdacc8:425">
+                    <span class="bar" data-om-id="fafdacc8:426"></span>
+                    <div class="body" data-om-id="fafdacc8:427">OOS cluster — Coca-Cola 2L, 38 stores São Paulo<small data-om-id="fafdacc8:428">Region 02 · opened 4m ago</small></div>
+                    <span class="rev" data-om-id="fafdacc8:429">+$42K</span>
+                  </div>
+                  <div class="s-hqi__alert warn" data-om-id="fafdacc8:430">
+                    <span class="bar" data-om-id="fafdacc8:431"></span>
+                    <div class="body" data-om-id="fafdacc8:432">Promo block missing — Nestlé summer end-cap<small data-om-id="fafdacc8:433">Region 04 · 21 stores</small></div>
+                    <span class="rev" data-om-id="fafdacc8:434">+$28K</span>
+                  </div>
+                  <div class="s-hqi__alert" data-om-id="fafdacc8:435">
+                    <span class="bar" data-om-id="fafdacc8:436"></span>
+                    <div class="body" data-om-id="fafdacc8:437">Competitor encroachment — shelf 3, Carrefour SP<small data-om-id="fafdacc8:438">14 stores · planogram drift</small></div>
+                    <span class="rev" data-om-id="fafdacc8:439">+$19K</span>
+                  </div>
+                  <div class="s-hqi__alert warn" data-om-id="fafdacc8:440">
+                    <span class="bar" data-om-id="fafdacc8:441"></span>
+                    <div class="body" data-om-id="fafdacc8:442">Price mismatch vs. PoS — Ferrero Rocher T16<small data-om-id="fafdacc8:443">Chile · 9 stores</small></div>
+                    <span class="rev" data-om-id="fafdacc8:444">+$12K</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 7 — Agentic flow / Convergence
+       ==================================================== -->
+  
+
+  <!-- ====================================================
+       SLIDE 8 — Credibility
+       ==================================================== -->
+  <section data-label="08 Credibility" data-om-id="fafdacc8:754" data-screen-label="08 08 Credibility" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="7">
+    <div class="s-cred" data-om-id="fafdacc8:755">
+      <div class="s-cred__head" data-om-id="fafdacc8:756">
+        <p class="kicker on-dark" data-om-id="fafdacc8:757"><span class="dot" data-om-id="fafdacc8:758"></span><span data-om-id="fafdacc8:759">The team</span></p>
+        <h2 data-om-id="fafdacc8:760">Silicon Valley DNA. <em data-om-id="fafdacc8:761">Backed by Palantir's founders.</em></h2>
+      </div>
+
+      <div class="s-cred__body" data-om-id="fafdacc8:762">
+        <div class="s-cred__team" data-om-id="fafdacc8:766">
+          <div class="s-cred__teamGrid" data-om-id="fafdacc8:768">
+            <div class="s-cred__member" data-om-id="fafdacc8:769">
+              <img src="team/david.png" alt="David Kumaran" data-om-id="fafdacc8:770">
+              <p class="nm" data-om-id="fafdacc8:771">David Kumaran</p>
+              <p class="ro" data-om-id="fafdacc8:772">Co-Founder, Growth</p>
+              <p class="em" data-om-id="fafdacc8:773">david@wisy.ai</p>
+            </div>
+            <div class="s-cred__member" data-om-id="fafdacc8:774">
+              <img src="team/kasey.png" alt="Kasey Kumaran-Stark" data-om-id="fafdacc8:775">
+              <p class="nm" data-om-id="fafdacc8:776">Kasey Kumaran-Stark</p>
+              <p class="ro" data-om-id="fafdacc8:777">Co-Founder, Product</p>
+              <p class="em" data-om-id="fafdacc8:778">kasey@wisy.ai</p>
+            </div>
+            <div class="s-cred__member" data-om-id="fafdacc8:779">
+              <img src="team/thomas.png" alt="Thomas Riley" data-om-id="fafdacc8:780">
+              <p class="nm" data-om-id="fafdacc8:781">Thomas Riley</p>
+              <p class="ro" data-om-id="fafdacc8:782">Commercial Director</p>
+              <p class="em" data-om-id="fafdacc8:783">thomas@wisy.ai</p>
+            </div>
+            <div class="s-cred__member" data-om-id="fafdacc8:784">
+              <img src="team/lorna.png" alt="Lorna Sánchez" data-om-id="fafdacc8:785">
+              <p class="nm" data-om-id="fafdacc8:786">Lorna Sánchez</p>
+              <p class="ro" data-om-id="fafdacc8:787">Solutions Architect</p>
+              <p class="em" data-om-id="fafdacc8:788">lorna@wisy.ai</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="s-cred__logos" data-om-id="fafdacc8:789">
+        <div class="s-cred__logo"><img src="logos/8vc.png" alt="8VC"/></div>
+        <div class="s-cred__logo"><img src="logos/nvidia.png" alt="NVIDIA"/></div>
+        <div class="s-cred__logo"><img src="logos/google.png" alt="Google"/></div>
+        <div class="s-cred__logo"><img src="logos/cocacola.png" alt="The Coca-Cola Foundation"/></div>
+        <div class="s-cred__logo"><img src="logos/kamay.png" alt="Kamay Ventures"/></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 9 — Social proof
+       ==================================================== -->
+  <section data-label="09 Social proof" data-om-id="fafdacc8:800" data-screen-label="09 09 Social proof" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="8">
+    <div class="s-proof" data-om-id="fafdacc8:801">
+      <div class="s-proof__photo" data-om-id="fafdacc8:802">
+        <div class="tag" data-om-id="fafdacc8:803"><span class="dot" data-om-id="fafdacc8:804"></span>Deployed · Chile</div>
+        <div class="brandStamp" data-om-id="fafdacc8:805">
+</div>
+      </div>
+      <div class="s-proof__right" data-om-id="fafdacc8:806">
+        <div class="s-proof__head" data-om-id="fafdacc8:807">
+          <p class="kicker" data-om-id="fafdacc8:808"><span class="dot" data-om-id="fafdacc8:809"></span><span data-om-id="fafdacc8:810">Validated in the wild</span></p>
+          <h2 data-om-id="fafdacc8:811">Proven where execution is hardest.</h2>
+        </div>
+
+        <div class="s-proof__quote" data-om-id="fafdacc8:812">
+          <p data-om-id="fafdacc8:813">Wisy collapsed a 30-minute store audit into <strong data-om-id="fafdacc8:814">seconds</strong> — and gave our reps the same shelf picture our HQ team sees. We stopped arguing about the data and started fixing the shelf.</p>
+          <div class="meta" data-om-id="fafdacc8:815">
+            <div class="av" data-om-id="fafdacc8:816">JR</div>
+            <div class="who" data-om-id="fafdacc8:817">J. Ramírez<span data-om-id="fafdacc8:818">VP Field Execution · CCU</span></div>
+          </div>
+        </div>
+
+        <div class="s-proof__quote" style="background: var(--wisy-gray-50);" data-om-id="fafdacc8:819">
+          <p data-om-id="fafdacc8:820">The first IR vendor where the rep gets value <em data-om-id="fafdacc8:821">at the shelf</em>, not three weeks later in a PDF.</p>
+          <div class="meta" data-om-id="fafdacc8:822">
+            <div class="av" style="background: var(--wisy-black)" data-om-id="fafdacc8:823">F</div>
+            <div class="who" data-om-id="fafdacc8:824">Director, Trade Marketing<span data-om-id="fafdacc8:825">Ferrero · LATAM</span></div>
+          </div>
+        </div>
+
+        <div class="s-proof__quote" style="background: var(--wisy-black); border-left: 3px solid var(--wisy-lime); border-radius: 16px; padding: 22px 28px;" data-om-id="fafdacc8:826">
+          <p style="color: var(--wisy-white); padding-left: 0; margin-top: 0; padding-top: 16px;" data-om-id="fafdacc8:827">"Everything comes down to execution. You can have the best strategy in the room — if the shelf doesn't reflect it, none of it matters."</p>
+          <div class="meta" data-om-id="fafdacc8:828">
+            <div class="av" style="background: var(--wisy-lime); color: var(--wisy-black); font-weight: 700;" data-om-id="fafdacc8:829">B</div>
+            <div class="who" style="color: var(--wisy-white);" data-om-id="fafdacc8:830">Bernardo — CEO, Iberia<span style="color: rgba(255,255,255,0.6);" data-om-id="fafdacc8:831">LATIN CONSUMER SUMMIT</span></div>
+          </div>
+        </div>
+
+        <div class="s-proof__stats" data-om-id="fafdacc8:832">
+          <div class="s-proof__stat" data-om-id="fafdacc8:833">
+            <p class="v" data-om-id="fafdacc8:834">4,200+</p>
+            <p class="l" data-om-id="fafdacc8:835">Stores scanned monthly — Chile &amp; Europe</p>
+          </div>
+          <div class="s-proof__stat" data-om-id="fafdacc8:836">
+            <p class="v" data-om-id="fafdacc8:837">1.8M</p>
+            <p class="l" data-om-id="fafdacc8:838">Shelf photos processed by AIR last quarter alone</p>
+          </div>
+          <div class="s-proof__stat" data-om-id="fafdacc8:839">
+            <p class="v" data-om-id="fafdacc8:840">11</p>
+            <p class="l" data-om-id="fafdacc8:841">Countries live — Latin America &amp; Europe&nbsp;</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 10 — Case study · Beverage distributor
+       ==================================================== -->
+  <section data-label="10 Case · Beverage" data-screen-label="10 Case study — Beverage distributor" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text">
+    <div class="s-case">
+      <div class="s-case__head">
+        <div>
+          <p class="kicker"><span class="dot"></span><span>Case study · 01 / 03</span></p>
+          <h2>Case study: <em>expediting retail execution</em></h2>
+        </div>
+        <p class="s-case__sub">Distributes multiple global brands — a combined data partnership unlocks cross-brand intelligence at scale.</p>
+      </div>
+
+      <div class="s-case__rule"></div>
+
+      <div class="s-case__grid">
+        <!-- Profile (col 1, row 1) -->
+        <div class="s-case__profile">
+          <p class="s-case__profileLbl">Company profile:</p>
+          <p class="s-case__profileName">LATAM beverage distributor</p>
+          <div class="s-case__profileDiv"></div>
+          <div class="s-case__stats">
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 20v-7"/><path d="M11 20V8"/><path d="M16 20v-4"/><path d="M21 20V5"/></svg></span>
+              <p class="s-case__statNum">$3B</p>
+              <p class="s-case__statLbl">Revenue</p>
+            </div>
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><path d="M4 10v9h16v-9"/><path d="M3 10l1.6-5h14.8L21 10a2.4 2.4 0 0 1-4.8 0 2.4 2.4 0 0 1-4.8 0 2.4 2.4 0 0 1-4.8 0A2.4 2.4 0 0 1 3 10z"/><path d="M9.5 19v-4.5h5V19"/></svg></span>
+              <p class="s-case__statNum">40K</p>
+              <p class="s-case__statLbl">Stores</p>
+            </div>
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><path d="M10 2.5h4v2.2l1.2 2.3a3 3 0 0 1 .3 1.3V20a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 8.5 20V8.3a3 3 0 0 1 .3-1.3L10 4.7z"/><path d="M8.6 11.5h6.8"/></svg></span>
+              <p class="s-case__statNum">1K</p>
+              <p class="s-case__statLbl">SKUs</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Use cases (col 2, row 1) -->
+        <div>
+          <p class="s-case__sectionLbl">Use cases</p>
+          <div class="s-case__pills">
+            <span class="s-case__pill"><span class="d"></span>Cooler compliance intelligence</span>
+            <span class="s-case__pill"><span class="d"></span>Contamination detection</span>
+            <span class="s-case__pill"><span class="d"></span>Planogram optimization</span>
+            <span class="s-case__pill"><span class="d"></span>Pricing intelligence</span>
+            <span class="s-case__pill"><span class="d"></span>Business rules automation</span>
+            <span class="s-case__pill"><span class="d"></span>Revenue-ranked store prioritization</span>
+          </div>
+        </div>
+
+        <!-- Challenge (col 1, row 2) -->
+        <div>
+          <p class="s-case__sectionLbl">The challenge</p>
+          <ul class="s-case__list">
+            <li>Zero real-time visibility between weekly visits</li>
+            <li>Manual audits taking 30+ minutes per store</li>
+            <li>Pricing &amp; compliance issues found weeks too late</li>
+            <li>Traditional-channel execution completely manual</li>
+          </ul>
+        </div>
+
+        <!-- Results (col 2, row 2) -->
+        <div>
+          <p class="s-case__sectionLbl">Results with Wisy</p>
+          <div class="s-case__results">
+            <div class="s-case__result">
+              <span class="s-case__resultVal">4.5%</span>
+              <p class="s-case__resultLbl">Lift in sales</p>
+            </div>
+            <div class="s-case__result">
+              <span class="s-case__resultVal">7.3%</span>
+              <p class="s-case__resultLbl">Market share gain</p>
+            </div>
+            <div class="s-case__result">
+              <span class="s-case__resultVal">175+</span>
+              <p class="s-case__resultLbl">Business rules automated</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 11 — Case study · Global confectionery
+       ==================================================== -->
+  <section data-label="11 Case · Confectionery" data-screen-label="11 Case study — Global confectionery" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text">
+    <div class="s-case">
+      <div class="s-case__head">
+        <div>
+          <p class="kicker"><span class="dot"></span><span>Case study · 02 / 03</span></p>
+          <h2>Case study: <em>global process automation</em></h2>
+        </div>
+        <p class="s-case__sub">Operates across 23 countries — a data partnership here means cross-border intelligence.</p>
+      </div>
+
+      <div class="s-case__rule"></div>
+
+      <div class="s-case__grid">
+        <div class="s-case__profile">
+          <p class="s-case__profileLbl">Company profile:</p>
+          <p class="s-case__profileName">Global confectionery leader</p>
+          <div class="s-case__profileDiv"></div>
+          <div class="s-case__stats">
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 20v-7"/><path d="M11 20V8"/><path d="M16 20v-4"/><path d="M21 20V5"/></svg></span>
+              <p class="s-case__statNum">$18B</p>
+              <p class="s-case__statLbl">Revenue</p>
+            </div>
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg></span>
+              <p class="s-case__statNum">23</p>
+              <p class="s-case__statLbl">Countries</p>
+            </div>
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><path d="M4 10v9h16v-9"/><path d="M3 10l1.6-5h14.8L21 10a2.4 2.4 0 0 1-4.8 0 2.4 2.4 0 0 1-4.8 0 2.4 2.4 0 0 1-4.8 0A2.4 2.4 0 0 1 3 10z"/><path d="M9.5 19v-4.5h5V19"/></svg></span>
+              <p class="s-case__statNum">2K+</p>
+              <p class="s-case__statLbl">Per country</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="s-case__sectionLbl">Use cases</p>
+          <div class="s-case__pills">
+            <span class="s-case__pill"><span class="d"></span>Real-time shelf intelligence</span>
+            <span class="s-case__pill"><span class="d"></span>Automated field workflows</span>
+            <span class="s-case__pill"><span class="d"></span>Cross-market compliance automation</span>
+            <span class="s-case__pill"><span class="d"></span>Centralized global visibility</span>
+            <span class="s-case__pill"><span class="d"></span>SAP perfect-store integration</span>
+          </div>
+        </div>
+
+        <div>
+          <p class="s-case__sectionLbl">The challenge</p>
+          <ul class="s-case__list">
+            <li>Needs granular shelf visibility to keep growing</li>
+            <li>No room to add field workload without hitting sales</li>
+            <li>Must scale &amp; replicate the model across countries to grow</li>
+            <li>Inconsistent capture criteria blocks normalized, centralized visibility</li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="s-case__sectionLbl">Results with Wisy</p>
+          <div class="s-case__results">
+            <div class="s-case__result">
+              <span class="s-case__resultVal">84%</span>
+              <p class="s-case__resultLbl">Time savings</p>
+            </div>
+            <div class="s-case__result">
+              <span class="s-case__resultVal">800+</span>
+              <p class="s-case__resultLbl">Data points per visit</p>
+            </div>
+            <div class="s-case__result">
+              <span class="s-case__resultVal sm">&lt;4 hours</span>
+              <p class="s-case__resultLbl">Field-team onboarding</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 12 — Case study · LATAM CPG leader
+       ==================================================== -->
+  <section data-label="12 Case · CPG leader" data-screen-label="12 Case study — Unified execution" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text">
+    <div class="s-case">
+      <div class="s-case__head">
+        <div>
+          <p class="kicker"><span class="dot"></span><span>Case study · 03 / 03</span></p>
+          <h2>Case study: <em>from fragmented data to unified execution</em></h2>
+        </div>
+        <p class="s-case__sub">Thousands of small-format stores and multi-currency pricing — one capture standard turns fragmentation into a single source of truth.</p>
+      </div>
+
+      <div class="s-case__rule"></div>
+
+      <div class="s-case__grid">
+        <div class="s-case__profile">
+          <p class="s-case__profileLbl">Company profile:</p>
+          <p class="s-case__profileName">LATAM CPG leader</p>
+          <div class="s-case__profileDiv"></div>
+          <div class="s-case__stats">
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 20v-7"/><path d="M11 20V8"/><path d="M16 20v-4"/><path d="M21 20V5"/></svg></span>
+              <p class="s-case__statNum">$7B</p>
+              <p class="s-case__statLbl">Revenue</p>
+            </div>
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg></span>
+              <p class="s-case__statNum">400</p>
+              <p class="s-case__statLbl">Sales reps</p>
+            </div>
+            <div class="s-case__stat">
+              <span class="s-case__statIcon"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11.4A7 7 0 0 0 5 9.6C5 14.7 12 21 12 21z"/><circle cx="12" cy="9.6" r="2.6"/></svg></span>
+              <p class="s-case__statNum">56K+</p>
+              <p class="s-case__statLbl">Monthly visits</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="s-case__sectionLbl">Use cases</p>
+          <div class="s-case__pills">
+            <span class="s-case__pill"><span class="d"></span>Pricing intelligence</span>
+            <span class="s-case__pill"><span class="d"></span>Planogram optimization</span>
+            <span class="s-case__pill"><span class="d"></span>Share-of-shelf analytics</span>
+            <span class="s-case__pill"><span class="d"></span>Next-best-action agent</span>
+          </div>
+        </div>
+
+        <div>
+          <p class="s-case__sectionLbl">The challenge</p>
+          <ul class="s-case__list">
+            <li>Multi-currency pricing &amp; handwritten tags make reliable price capture impossible</li>
+            <li>Legacy manual tools slow reps and cut into selling time</li>
+            <li>No real-time visibility — issues found weeks late, not minutes</li>
+            <li>Thousands of small stores, zero standardization without automation</li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="s-case__sectionLbl">Results with Wisy</p>
+          <div class="s-case__results">
+            <div class="s-case__result">
+              <span class="s-case__resultVal">90%</span>
+              <p class="s-case__resultLbl">Time saved in survey responses</p>
+            </div>
+            <div class="s-case__result">
+              <span class="s-case__resultVal">70%</span>
+              <p class="s-case__resultLbl">Time saved in price collection</p>
+            </div>
+            <div class="s-case__result">
+              <span class="s-case__resultVal">2%</span>
+              <p class="s-case__resultLbl">Share-of-shelf increase</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 13 — Bottom line
+       ==================================================== -->
+  <section data-label="13 Close" data-om-id="fafdacc8:842" data-screen-label="10 10 Close" data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text" data-deck-slide="9" data-deck-last-visible="">
+    <div class="s-close" data-om-id="fafdacc8:843">
+      <div class="s-close__head" data-om-id="fafdacc8:844">
+        <p class="kicker" data-om-id="fafdacc8:845"><span class="dot" data-om-id="fafdacc8:846"></span><span data-om-id="fafdacc8:847">The bottom line</span></p>
+        <p class="kicker" style="color: var(--fg-3)" data-om-id="fafdacc8:848"><span data-om-id="fafdacc8:849">wisy:</span></p>
+      </div>
+
+      <div class="s-close__hero" data-om-id="fafdacc8:850">
+        <p class="s-close__num" style="height: 206px" data-om-id="fafdacc8:851">10<span class="x" data-om-id="fafdacc8:852">×</span><span class="min" data-om-id="fafdacc8:853">Minimum</span></p>
+        <div class="s-close__right" data-om-id="fafdacc8:854">
+          <h2 data-om-id="fafdacc8:855">Projected ROI on Wisy <em data-om-id="fafdacc8:856">in year one.</em></h2>
+          <p class="quote" data-om-id="fafdacc8:857">Let our competitors chase next-best-actions. We'll build your scaling intelligence layer.</p>
+        </div>
+      </div>
+
+      <div class="s-close__cta" data-om-id="fafdacc8:858">
+        <div class="who" data-om-id="fafdacc8:859">SALES@WISY.AI</div>
+        <div class="next" data-om-id="fafdacc8:860">
+          <span data-om-id="fafdacc8:861">Next step</span>
+          <span class="btn" data-om-id="fafdacc8:862">Pilot in 30 days &nbsp;→</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</deck-stage>
+
+<script src="deck-stage.js"></script>
+<script src="image-slot.js"></script>
+<script>
+  // Live ticking counter inside the Agent Orchestrator (slide 7)
+  (function tickActions(){
+    const el = document.getElementById('convActions');
+    if (!el) return;
+    let v = 2481;
+    setInterval(() => {
+      // small random walk, biased upward, never below 2000
+      const delta = Math.floor(Math.random() * 80) - 30;
+      v = Math.max(2000, Math.min(3200, v + delta));
+      el.textContent = v.toLocaleString();
+    }, 700);
+  })();
+
+  // Cycle per-agent throughput numbers
+  (function tickAgentRates(){
+    const els = document.querySelectorAll('.s-conv__agent .rate em');
+    if (!els.length) return;
+    const bases = [3.2, 1.8, 0.9];
+    setInterval(() => {
+      els.forEach((el, i) => {
+        if (i >= bases.length) return;
+        const wobble = (Math.random() * 0.6 - 0.3);
+        const v = Math.max(0.2, bases[i] + wobble);
+        el.textContent = v.toFixed(1) + 'k';
+      });
+    }, 900);
+  })();
+</script>
+<script>
+  // Populate the HQI heatmap
+  (function buildHeat(){
+    const heat = document.getElementById('heat');
+    if (!heat) return;
+    const COLS = 16, ROWS = 8;
+    const palette = [
+      '#e8f5e9',  // light green — compliant
+      '#a5d6a7',  // medium green
+      '#fff9c4',  // light yellow — attention needed
+      '#ffcc02',  // yellow — warning
+      '#ef5350',  // red — critical
+    ];
+    // Seeded pseudo-random distribution so it looks intentional
+    let seed = 7;
+    const rng = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+    for (let i = 0; i < COLS * ROWS; i++) {
+      const r = rng();
+      let idx;
+      if (r < 0.40) idx = 0;
+      else if (r < 0.65) idx = 1;
+      else if (r < 0.85) idx = 2;
+      else if (r < 0.96) idx = 3;
+      else idx = 4;
+      // sprinkle a few lime "danger" cells
+      const lime = (rng() < 0.04);
+      const span = document.createElement('span');
+      span.style.background = lime ? '#ef5350' : palette[idx];
+      heat.appendChild(span);
+    }
+  })();
+</script>
+
+<!-- Tweaks: AIR device imagery (real photos / icons), photo shape, network speed -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<div id="tweaks-root"></div>
+<script type="text/babel" src="air-tweaks.jsx"></script>
+
+<template id="__bundler_thumbnail" data-bg-color="#5354ED">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#5354ED"/>
+    <text x="600" y="380" font-family="Helvetica, Arial, sans-serif" font-size="200" font-weight="700" fill="#DDF45B" text-anchor="middle">W</text>
+    <text x="600" y="500" font-family="Helvetica, Arial, sans-serif" font-size="48" font-weight="500" letter-spacing="8" fill="#ffffff" text-anchor="middle">WISY</text>
+  </svg>
+</template>
+
+</body>
+</html>
